@@ -1,0 +1,27 @@
+/* aurecurve nearby
+----------------------------------------------- */
+pre.azrcrv_n{
+	margin: 0;
+	padding: 0;
+	background: none;
+	font-family: "Source Sans Pro", Helvetica, sans-serif;
+	font-size: 100%;
+}
+table.azrcrv_n{
+	width: 65%;
+	margin: auto;
+	border: 2px solid #007FFF;
+}
+table.azrcrv_n th{
+	color: #FFF;
+	background-color: #007FFF;
+	font-size: 12px;
+	font-family: "Open Sans", sans-serif;
+	font-weight: 900;
+	border: 1px solid #007FFF;
+	padding: 1px 3px;
+}
+table.azrcrv_n td{
+	border: 1px solid #007FFF;
+	padding: 1px 3px;
+}
