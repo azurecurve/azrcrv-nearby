@@ -6,7 +6,7 @@ Tags:			location,gps
 Author:			azurecurve
 Author URI:		https://development.azurecurve.co.uk/
 Plugin URI:		https://development.azurecurve.co.uk/classicpress-plugins/nearby/
-Download link:	https://github.com/azurecurve/azrcrv-code/releases/download/v1.0.0/azrcrv-nearby.zip
+Download link:	https://github.com/azurecurve/azrcrv-nearby/releases/download/v1.0.0/azrcrv-nearby.zip
 Donate link:	https://development.azurecurve.co.uk/support-development/
 Requires PHP:	5.6
 Requires:		1.0.0
@@ -24,7 +24,11 @@ Allows a table of nearby locations to be created based on GPS co-ordinates.
 
 Creates a table of nearby locations (pages) based on GPS co-ordinates; integrates with [Flags from azurecurve](https://development.azurecurve.co.uk/classicpress-plugins/flags/) and [Toggle Show/Hide from azurecurve](https://development.azurecurve.co.uk/classicpress-plugins/toggle-showhide/).
 
-Apply the [nearby] shortcode to a page with co-ordinates and nearby ocations, based on the settings, will be displayed in a table.
+Apply the [nearby] shortcode to a page with co-ordinates and nearby locations (pages with co-ordinates), based on the settings, will be displayed in a table.
+
+Examples of this plugin in action:
+* [coppr|Distilleries To Visit](https://coppr.uk/distilleries/ireland/northern/echlinville/)
+* [DarkNexus|Tourist Attractions](https://www.darkforge.co.uk/attractions/europe/united-kingdom/northern-ireland/county-down/killowen-distillery/)
 
 This plugin is multisite compatible; each site will need settings to be configured in the admin dashboard.
 
