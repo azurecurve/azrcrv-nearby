@@ -1,18 +1,16 @@
 /* aurecurve nearby
 ----------------------------------------------- */
-pre.azrcrv_n{
-	margin: 0;
-	padding: 0;
-	background: none;
-	font-family: "Source Sans Pro", Helvetica, sans-serif;
-	font-size: 100%;
-}
 table.azrcrv_n{
 	width: 65%;
 	margin: auto;
 	border: 2px solid #007FFF;
 }
-table.azrcrv_n th{
+table.azrcrv_n_toggle{
+	width: 95%;
+	margin: auto;
+	border: 2px solid #007FFF;
+}
+table.azrcrv_n th ,table.azrcrv_n_toggle th{
 	color: #FFF;
 	background-color: #007FFF;
 	font-size: 12px;
@@ -21,7 +19,13 @@ table.azrcrv_n th{
 	border: 1px solid #007FFF;
 	padding: 1px 3px;
 }
-table.azrcrv_n td{
+table.azrcrv_n td, table.azrcrv_n_toggle td{
 	border: 1px solid #007FFF;
 	padding: 1px 3px;
+}
+table.azrcrv_n tr th:nth-child(2) ,table.azrcrv_n_toggle tr th:nth-child(2), table.azrcrv_n tr th:nth-child(3) ,table.azrcrv_n_toggle tr th:nth-child(3) ,table.azrcrv_n tr td:nth-child(2) ,table.azrcrv_n_toggle tr td:nth-child(2), table.azrcrv_n tr td:nth-child(3) ,table.azrcrv_n_toggle tr td:nth-child(3){
+   text-align: center;
+}
+table.azrcrv_n tr th:nth-child(3) ,table.azrcrv_n_toggle tr th:nth-child(3) ,table.azrcrv_n tr td:nth-child(3) ,table.azrcrv_n_toggle tr td:nth-child(3){
+   width: 100px;
 }

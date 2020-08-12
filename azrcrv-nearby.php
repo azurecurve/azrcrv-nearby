@@ -299,7 +299,7 @@ function azrcrv_n_render_details_metabox() {
 								value="<?php echo esc_attr( $azrcrv_n_coordinates ); ?>"
 							><br />
 								<?php
-									_e( 'Format of co-ordinates is longitude, latitude (e.g. 51.477800, -0.001400).', 'nearby' );
+									_e( 'Format of co-ordinates is latitude, longitude (e.g. 51.477800, -0.001400).', 'nearby' );
 								?>
 						</td>
 					</tr>
@@ -630,6 +630,13 @@ function azrcrv_n_save_options(){
 	}
 }
 
+
+/**
+ * Display shortcode.
+ *
+ * @since 1.0.0
+ *
+ */
 function azrcrv_n_displaynearbylocations($atts, $content = null){
 	
 	global $wpdb;
@@ -648,7 +655,14 @@ function azrcrv_n_displaynearbylocations($atts, $content = null){
 	// nearby attractions
 	if (strlen($coordinates) > 0){
 		$sql = 
-				"SELECT PMO.post_id,ROUND(((((acos(sin((TRIM(SUBSTRING_INDEX(PM.meta_value, ',', 1)) * pi()/180)) * sin((TRIM(SUBSTRING_INDEX(PMO.meta_value, ',', 1)) * pi()/180))+cos((TRIM(SUBSTRING_INDEX(PM.meta_value, ',', 1))*pi()/180)) * cos((TRIM(SUBSTRING_INDEX(PMO.meta_value, ',', 1)) * pi()/180)) * cos(((TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(PM.meta_value, ',', 2), ',', -1)) - TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(PMO.meta_value, ',', 2), ',', -1))) * pi()/180))))*180/pi())*60*1.1515)) ".$units.",2) AS DISTANCE 
+				"SELECT PMO.post_id,ROUND(((((acos(sin((TRIM(SUBSTRING_INDEX(PM.meta_value, ',', 1)) * pi()/180)) * sin((TRIM(SUBSTRING_INDEX(PMO.meta_value, ',', 1)) * pi()/180))+cos((TRIM(SUBSTRING_INDEX(PM.meta_value, ',', 1))*pi()/180)) * cos((TRIM(SUBSTRING_INDEX(PMO.meta_value, ',', 1)) * pi()/180)) * cos(((TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(PM.meta_value, ',', 2), ',', -1)) - TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(PMO.meta_value, ',', 2), ',', -1))) * pi()/180))))*180/pi())*60*1.1515)) ".$units.",2) AS DISTANCE
+				,(360.0 + 
+				  DEGREES(ATAN2(
+				   SIN(RADIANS(TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(PMO.meta_value, ',', 2), ',', -1))-TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(PM.meta_value, ',', 2), ',', -1))))*COS(RADIANS(TRIM(SUBSTRING_INDEX(PMO.meta_value, ',', 1)))),
+				   COS(RADIANS(TRIM(SUBSTRING_INDEX(PM.meta_value, ',', 1))))*SIN(RADIANS(TRIM(SUBSTRING_INDEX(PMO.meta_value, ',', 1))))-SIN(RADIANS(TRIM(SUBSTRING_INDEX(PM.meta_value, ',', 1))))*COS(RADIANS(TRIM(SUBSTRING_INDEX(PMO.meta_value, ',', 1))))*
+						COS(RADIANS(TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(PMO.meta_value, ',', 2), ',', -1))-TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(PM.meta_value, ',', 2), ',', -1))))
+				  ))
+				 ) % 360.0 AS BEARING
 				FROM ".$wpdb->prefix."postmeta AS PM 
 				INNER JOIN ".$wpdb->prefix."posts AS P ON P.ID = PM.post_id AND P.post_status = 'publish' AND P.post_type = 'page'
 				INNER JOIN ".$wpdb->prefix."postmeta AS PMO ON PMO.meta_key = PM.meta_key AND PMO.post_id <> PM.post_id 
@@ -672,7 +686,7 @@ function azrcrv_n_displaynearbylocations($atts, $content = null){
 		$resultset_table = $wpdb->get_results( $sql );
 		
 		foreach ($resultset_table as $result_table){
-			$nearby[$result_table->post_id] = $result_table->DISTANCE;
+			$nearby[$result_table->post_id] = array('distance' => $result_table->DISTANCE, 'bearing' => $result_table->BEARING);
 		}
 		
 		asort($nearby);
@@ -680,9 +694,13 @@ function azrcrv_n_displaynearbylocations($atts, $content = null){
 		$found = 0;
 		
 		$attractions = '';
-		$attractions = '<table class="azrcrv_n">';
+		if (azrcrv_n_is_plugin_active('azrcrv-toggle-showhide/azrcrv-toggle-showhide.php') AND $options['enable-toggle-showhide']){
+			$attractions = '<table class="azrcrv_n_toggle">';
+		}else{
+			$attractions = '<table class="azrcrv_n">';
+		}
 		$attractions .= '<colgroup><col style="width: 100%-100px; "><col style="width: 100px; align: center; "></colgroup>';
-		$attractions .= '<tr><th class="azrcrv_n">Location</th><th class="azrcrv_n">Distance</th></tr>';
+		$attractions .= '<tr><th class="azrcrv_n">Location</th><th class="azrcrv_n">Distance</th><th class="azrcrv_n">Direction</th></tr>';
 		
 		foreach ($nearby as $key => $value)  {
 			$attraction = get_page( $key );
@@ -692,7 +710,9 @@ function azrcrv_n_displaynearbylocations($atts, $content = null){
 			}else{
 				$country = '';
 			}
-			$attractions .= '<tr><td class="azrcrv_n"><a href="'.$link.'">'.$attraction->post_title.' '.$country.'</a></td><td style="border: 1px solid #38464b; ">'.$value.' '.$options['unit-of-distance'].'</td></tr>';
+			$direction = azrcrv_n_getcompassdirectionthirtytwo($value['bearing']);
+			
+			$attractions .= '<tr><td class="azrcrv_n"><a href="'.$link.'">'.$attraction->post_title.' '.$country.'</a></td><td class="azrcrv_n">'.$value['distance'].' '.$options['unit-of-distance'].'</td><td class="azrcrv_n">'.$direction.'</td></tr>';
 			$found++;
 			if ($found == $options['maximim-locations']){ break; }
 		}
@@ -711,4 +731,82 @@ function azrcrv_n_displaynearbylocations($atts, $content = null){
 	}
 	
 	return $output;
+}
+
+
+/**
+ * Get 32 point compass direction for location bearing.
+ *
+ * @since 1.0.0
+ *
+ */
+function azrcrv_n_getcompassdirectionthirtytwo($bearing) {
+	if ($bearing > 354.37 OR $bearing <= 5.62){
+		$direction = "N";
+	}elseif ($bearing > 5.62 AND $bearing <= 16.87){
+		$direction = "NbE";
+	}elseif ($bearing > 16.87 AND $bearing <= 28.12){
+		$direction = "NNE";
+	}elseif ($bearing > 28.12 AND $bearing <= 39.37){
+		$direction = "NEbN";
+	}elseif ($bearing > 39.37 AND $bearing <= 50.62){
+		$direction = "NE";
+	}elseif ($bearing > 50.62 AND $bearing <= 61.87){
+		$direction = "NEbE";
+	}elseif ($bearing > 61.87 AND $bearing <= 73.12){
+		$direction = "ENE";
+	}elseif ($bearing > 73.12 AND $bearing <= 84.37){
+		$direction = "EbN";
+	}elseif ($bearing > 84.37 AND $bearing <= 95.62){
+		$direction = "E";
+	}elseif ($bearing > 95.62 AND $bearing <= 106.87){
+		$direction = "EbS";
+	}elseif ($bearing > 106.87 AND $bearing <= 118.12){
+		$direction = "ESE";
+	}elseif ($bearing > 118.12 AND $bearing <= 129.37){
+		$direction = "SEbE";
+	}elseif ($bearing > 129.37 AND $bearing <= 140.62){
+		$direction = "SE";
+	}elseif ($bearing > 140.62 AND $bearing <= 151.87){
+		$direction = "SEbS";
+	}elseif ($bearing > 151.87 AND $bearing <= 163.12){
+		$direction = "SSE";
+	}elseif ($bearing > 163.12 AND $bearing <= 174.37){
+		$direction = "SbE";
+	}elseif ($bearing > 174.37 AND $bearing <= 185.62){
+		$direction = "S";
+	}elseif ($bearing > 185.62 AND $bearing <= 198.87){
+		$direction = "SbW";
+	}elseif ($bearing > 198.87 AND $bearing <= 208.12){
+		$direction = "SSW";
+	}elseif ($bearing > 208.12 AND $bearing <= 219.37){
+		$direction = "SWbS";
+	}elseif ($bearing > 219.37 AND $bearing <= 219.37){
+		$direction = "SW";
+	}elseif ($bearing > 219.37 AND $bearing <= 241.87){
+		$direction = "SWbW";
+	}elseif ($bearing > 241.87 AND $bearing <= 253.12){
+		$direction = "WSW";
+	}elseif ($bearing > 253.12 AND $bearing <= 264.37){
+		$direction = "WbS";
+	}elseif ($bearing > 264.37 AND $bearing <= 275.62){
+		$direction = "W";
+	}elseif ($bearing > 275.62 AND $bearing <= 286.87){
+		$direction = "WbN";
+	}elseif ($bearing > 286.87 AND $bearing <= 298.12){
+		$direction = "WNW";
+	}elseif ($bearing > 298.12 AND $bearing <= 309.37){
+		$direction = "NWbW";
+	}elseif ($bearing > 309.37 AND $bearing <= 320.62){
+		$direction = "NW";
+	}elseif ($bearing > 320.62 AND $bearing <= 331.87){
+		$direction = "NWbN";
+	}elseif ($bearing > 331.87 AND $bearing <= 343.12){
+		$direction = "NNW";
+	}elseif ($bearing > 343.12 AND $bearing <= 354.37){
+		$direction = "NbW";
+	}else{
+		$direction = $bearing;
+	}
+	return $direction;
 }
