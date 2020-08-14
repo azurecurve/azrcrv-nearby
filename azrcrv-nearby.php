@@ -723,7 +723,7 @@ function azrcrv_n_displaynearbylocations($atts, $content = null){
 		$attractions .= '<tr><th class="azrcrv_n">Location</th><th class="azrcrv_n">Distance</th><th class="azrcrv_n">Direction</th></tr>';
 		
 		$max_locations = 50;
-		if (isset($options['maximum-locations']){
+		if (isset($options['maximum-locations'])){
 			$max_locations = $options['maximum-locations'];
 		}
 		
