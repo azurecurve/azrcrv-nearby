@@ -1,12 +1,12 @@
 === Nearby ===
 
 Description:	Creates table of nearby locations based on GPS co-ordinates.
-Version:		1.2.0
+Version:		2.0.0
 Tags:			location,gps
 Author:			azurecurve
 Author URI:		https://development.azurecurve.co.uk/
 Plugin URI:		https://development.azurecurve.co.uk/classicpress-plugins/nearby/
-Download link:	https://github.com/azurecurve/azrcrv-nearby/releases/download/v1.2.0/azrcrv-nearby.zip
+Download link:	https://github.com/azurecurve/azrcrv-nearby/releases/download/v2.0.0/azrcrv-nearby.zip
 Donate link:	https://development.azurecurve.co.uk/support-development/
 Requires PHP:	5.6
 Requires:		1.0.0
@@ -28,7 +28,7 @@ Apply the [nearby] shortcode to a page with co-ordinates and nearby locations (p
 
 Examples of this plugin in action:
 * [coppr|Distilleries To Visit](https://coppr.uk/distilleries/ireland/northern/echlinville/)
-* [DarkNexus|Tourist Attractions](https://www.darkforge.co.uk/attractions/europe/united-kingdom/northern-ireland/county-down/killowen-distillery/)
+* [DarkNexus|Tourist Attractions](https://www.darkforge.co.uk/attractions/europe/republic-of-ireland/east/county-meath/newgrange-monument/)
 
 This plugin is multisite compatible; each site will need settings to be configured in the admin dashboard.
 
@@ -55,8 +55,11 @@ This plugin is developed for ClassicPress, but will likely work on WordPress.
 
 # Changelog
 
+### [Version 2.0.0](https://github.com/azurecurve/azrcrv-nearby/releases/tag/v2.0.0)
+ * Correct typo in maximum-location option which was maximim-locations; settings will need to be updated and saved once update applied.
+
 ### [Version 1.2.0](https://github.com/azurecurve/azrcrv-nearby/releases/tag/v1.2.0)
- * Add 16-wind compass rose with option to toggle from 32-wind compass rose.
+ * Add 16 point compass with option to toggle from 32 point compass.
 
 ### [Version 1.1.0](https://github.com/azurecurve/azrcrv-nearby/releases/tag/v1.1.0)
  * Add direction for nearby locations using 32 compass points.

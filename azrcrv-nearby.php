@@ -3,7 +3,7 @@
  * ------------------------------------------------------------------------------
  * Plugin Name: Nearby
  * Description: Creates table of nearby locations based on GPS co-ordinates.
- * Version: 1.2.0
+ * Version: 2.0.0
  * Author: azurecurve
  * Author URI: https://development.azurecurve.co.uk/classicpress-plugins/
  * Plugin URI: https://development.azurecurve.co.uk/classicpress-plugins/nearby/
@@ -124,7 +124,7 @@ function azrcrv_n_set_default_options($networkwide){
 	$option_name = 'azrcrv-n';
 	
 	$new_options = array(
-						'maximim-locations' => 20,
+						'maximum-locations' => 20,
 						'location-distance' => 200,
 						'compass-type' => 16,
 						'unit-of-distance' => 'miles',
@@ -487,7 +487,7 @@ function azrcrv_n_display_options(){
 				<table class="form-table">
 				
 					<tr><th scope="row"><label for="nearby"><?php esc_html_e('Maximum Locations', 'nearby'); ?></label></th><td>
-						<input name="maximim-locations" type="number" step="1" min="1" id="maximim-locations" value="<?php echo stripslashes($options['maximim-locations']); ?>" class="small-text" /> locations</td>
+						<input name="maximum-locations" type="number" step="1" min="1" id="maximum-locations" value="<?php echo stripslashes($options['maximum-locations']); ?>" class="small-text" /> locations</td>
 					</td></tr>
 					
 					<tr><th scope="row"><label for="nearby"><?php esc_html_e('Location Distance', 'nearby'); ?></label></th><td>
@@ -508,11 +508,11 @@ function azrcrv_n_display_options(){
 						<select name="compass-type">
 							<?php
 								if ($options['compass-type'] == '16'){
-									echo '<option value="16" selected>16-wind compass rose</option>';
-									echo '<option value="32" >32-wind compass rose</option>';
-								}else{ // 32-wind compass rose
-									echo '<option value="16" >16-wind compass rose</option>';
-									echo '<option value="32" selected >32-wind compass rose</option>';
+									echo '<option value="16" selected>16 point compass</option>';
+									echo '<option value="32" >32 point compass</option>';
+								}else{ // 32-wind compass
+									echo '<option value="16" >16 point compass</option>';
+									echo '<option value="32" selected >32 point compass</option>';
 								}
 							?>
 						</select></td>
@@ -602,7 +602,7 @@ function azrcrv_n_save_options(){
 		// Retrieve original plugin options array
 		$options = get_option('azrcrv-n');
 		
-		$option_name = 'maximim-locations';
+		$option_name = 'maximum-locations';
 		if (isset($_POST[$option_name])){
 			$options[$option_name] = sanitize_text_field(intval($_POST[$option_name]));
 		}
@@ -722,6 +722,12 @@ function azrcrv_n_displaynearbylocations($atts, $content = null){
 		$attractions .= '<colgroup><col style="width: 100%-100px; "><col style="width: 100px; align: center; "></colgroup>';
 		$attractions .= '<tr><th class="azrcrv_n">Location</th><th class="azrcrv_n">Distance</th><th class="azrcrv_n">Direction</th></tr>';
 		
+		$max_locations = 50;
+		if (isset($options['maximum-locations']){
+			$max_locations = $options['maximum-locations'];
+		}
+		
+		
 		foreach ($nearby as $key => $value)  {
 			$attraction = get_page( $key );
 			$link = get_permalink( $key );
@@ -738,7 +744,7 @@ function azrcrv_n_displaynearbylocations($atts, $content = null){
 			
 			$attractions .= '<tr><td class="azrcrv_n"><a href="'.$link.'">'.$attraction->post_title.' '.$country.'</a></td><td class="azrcrv_n">'.$value['distance'].' '.$options['unit-of-distance'].'</td><td class="azrcrv_n">'.$direction.'</td></tr>';
 			$found++;
-			if ($found == $options['maximim-locations']){ break; }
+			if ($found == $max_locations){ break; }
 		}
 		
 		if ($found == 0){
