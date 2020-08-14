@@ -3,7 +3,7 @@
  * ------------------------------------------------------------------------------
  * Plugin Name: Nearby
  * Description: Creates table of nearby locations based on GPS co-ordinates.
- * Version: 1.0.0
+ * Version: 1.2.0
  * Author: azurecurve
  * Author URI: https://development.azurecurve.co.uk/classicpress-plugins/
  * Plugin URI: https://development.azurecurve.co.uk/classicpress-plugins/nearby/
@@ -126,6 +126,7 @@ function azrcrv_n_set_default_options($networkwide){
 	$new_options = array(
 						'maximim-locations' => 20,
 						'location-distance' => 200,
+						'compass-type' => 16,
 						'unit-of-distance' => 'miles',
 						'enable-flags' => 0,
 						'enable-toggle-showhide' => 0,
@@ -502,6 +503,20 @@ function azrcrv_n_display_options(){
 							?>
 						</select></td>
 					</td></tr>
+					
+					<tr><th scope="row"><label for="compass-type"><?php esc_html_e('Compass Type', 'nearby'); ?></label></th><td>
+						<select name="compass-type">
+							<?php
+								if ($options['compass-type'] == '16'){
+									echo '<option value="16" selected>16-wind compass rose</option>';
+									echo '<option value="32" >32-wind compass rose</option>';
+								}else{ // 32-wind compass rose
+									echo '<option value="16" >16-wind compass rose</option>';
+									echo '<option value="32" selected >32-wind compass rose</option>';
+								}
+							?>
+						</select></td>
+					</td></tr>
 									
 					<tr>
 						<th scope="row">
@@ -598,6 +613,11 @@ function azrcrv_n_save_options(){
 		}
 		
 		$option_name = 'unit-of-distance';
+		if (isset($_POST[$option_name])){
+			$options[$option_name] = sanitize_text_field($_POST[$option_name]);
+		}
+		
+		$option_name = 'compass-type';
 		if (isset($_POST[$option_name])){
 			$options[$option_name] = sanitize_text_field($_POST[$option_name]);
 		}
@@ -710,7 +730,11 @@ function azrcrv_n_displaynearbylocations($atts, $content = null){
 			}else{
 				$country = '';
 			}
-			$direction = azrcrv_n_getcompassdirectionthirtytwo($value['bearing']);
+			if (isset($options['compass-type']) AND $options['compass-type'] == 16){
+				$direction = azrcrv_n_getcompassdirectionsixteen($value['bearing']);
+			}else{
+				$direction = azrcrv_n_getcompassdirectionthirtytwo($value['bearing']);
+			}
 			
 			$attractions .= '<tr><td class="azrcrv_n"><a href="'.$link.'">'.$attraction->post_title.' '.$country.'</a></td><td class="azrcrv_n">'.$value['distance'].' '.$options['unit-of-distance'].'</td><td class="azrcrv_n">'.$direction.'</td></tr>';
 			$found++;
@@ -733,6 +757,50 @@ function azrcrv_n_displaynearbylocations($atts, $content = null){
 	return $output;
 }
 
+/**
+ * Get 16 point compass direction for location bearing.
+ *
+ * @since 1.2.0
+ *
+ */
+function azrcrv_n_getcompassdirectionsixteen($bearing) {
+	if ($bearing > 348.75 OR $bearing <= 11.25){
+		$direction = "N";
+	}elseif ($bearing > 11.25 AND $bearing <= 37.5){
+		$direction = "NNE";
+	}elseif ($bearing > 37.5 AND $bearing <= 56.25){
+		$direction = "NE";
+	}elseif ($bearing > 56.25 AND $bearing <= 78.75){
+		$direction = "ENE";
+	}elseif ($bearing > 78.75 AND $bearing <= 101.25){
+		$direction = "E";
+	}elseif ($bearing > 101.25 AND $bearing <= 123.75){
+		$direction = "ESE";
+	}elseif ($bearing > 123.75 AND $bearing <= 146.25){
+		$direction = "SE";
+	}elseif ($bearing > 146.25 AND $bearing <= 168.75){
+		$direction = "SSE";
+	}elseif ($bearing > 168.75 AND $bearing <= 191.25){
+		$direction = "S";
+	}elseif ($bearing > 191.25 AND $bearing <= 213.75){
+		$direction = "SSW";
+	}elseif ($bearing > 213.75 AND $bearing <= 236.25){
+		$direction = "SW";
+	}elseif ($bearing > 236.25 AND $bearing <= 258.75){
+		$direction = "WSW";
+	}elseif ($bearing > 258.75 AND $bearing <= 281.25){
+		$direction = "W";
+	}elseif ($bearing > 281.25 AND $bearing <= 303.75){
+		$direction = "WNW";
+	}elseif ($bearing > 303.75 AND $bearing <= 326.25){
+		$direction = "NW";
+	}elseif ($bearing > 326.25 AND $bearing <= 348.75){
+		$direction = "NNW";
+	}else{
+		$direction = $bearing;
+	}
+	return $direction;
+}
 
 /**
  * Get 32 point compass direction for location bearing.

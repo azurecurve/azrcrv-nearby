@@ -1,12 +1,12 @@
 === Nearby ===
 
 Description:	Creates table of nearby locations based on GPS co-ordinates.
-Version:		1.1.0
+Version:		1.2.0
 Tags:			location,gps
 Author:			azurecurve
 Author URI:		https://development.azurecurve.co.uk/
 Plugin URI:		https://development.azurecurve.co.uk/classicpress-plugins/nearby/
-Download link:	https://github.com/azurecurve/azrcrv-nearby/releases/download/v1.1.0/azrcrv-nearby.zip
+Download link:	https://github.com/azurecurve/azrcrv-nearby/releases/download/v1.2.0/azrcrv-nearby.zip
 Donate link:	https://development.azurecurve.co.uk/support-development/
 Requires PHP:	5.6
 Requires:		1.0.0
@@ -54,6 +54,9 @@ This plugin is developed for ClassicPress, but will likely work on WordPress.
 == Changelog ==
 
 # Changelog
+
+### [Version 1.2.0](https://github.com/azurecurve/azrcrv-nearby/releases/tag/v1.2.0)
+ * Add 16-wind compass rose with option to toggle from 32-wind compass rose.
 
 ### [Version 1.1.0](https://github.com/azurecurve/azrcrv-nearby/releases/tag/v1.1.0)
  * Add direction for nearby locations using 32 compass points.
