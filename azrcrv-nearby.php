@@ -3,7 +3,7 @@
  * ------------------------------------------------------------------------------
  * Plugin Name: Nearby
  * Description: Creates table of nearby locations based on GPS co-ordinates.
- * Version: 2.0.0
+ * Version: 2.1.0
  * Author: azurecurve
  * Author URI: https://development.azurecurve.co.uk/classicpress-plugins/
  * Plugin URI: https://development.azurecurve.co.uk/classicpress-plugins/nearby/
@@ -50,6 +50,8 @@ add_action( 'save_post', 'azrcrv_n_save_details_revisions' );
 add_filter('plugin_action_links', 'azrcrv_n_add_plugin_action_link', 10, 2);
 add_filter( '_wp_post_revision_fields', 'azrcrv_n_get_details_revisions_fields' );
 add_filter( '_wp_post_revision_field_my_meta', 'azrcrv_n_display_details_revisions_fields', 10, 2 );
+add_filter('codepotent_update_manager_image_path', 'azrcrv_n_custom_image_path');
+add_filter('codepotent_update_manager_image_url', 'azrcrv_n_custom_image_url');
 
 // add shortcodes
 add_shortcode('nearby', 'azrcrv_n_displaynearbylocations');
@@ -114,6 +116,32 @@ function azrcrv_n_load_css(){
 }
 
 /**
+ * Custom plugin image path.
+ *
+ * @since 2.1.0
+ *
+ */
+function azrcrv_n_custom_image_path($path){
+    if (strpos($path, 'azrcrv-nearby') !== false){
+        $path = plugin_dir_path(__FILE__).'assets/pluginimages';
+    }
+    return $path;
+}
+
+/**
+ * Custom plugin image url.
+ *
+ * @since 2.1.0
+ *
+ */
+function azrcrv_n_custom_image_url($url){
+    if (strpos($url, 'azrcrv-nearby') !== false){
+        $url = plugin_dir_url(__FILE__).'assets/pluginimages';
+    }
+    return $url;
+}
+
+/**
  * Set default options for plugin.
  *
  * @since 1.0.0
@@ -131,7 +159,9 @@ function azrcrv_n_set_default_options($networkwide){
 						'enable-flags' => 0,
 						'enable-toggle-showhide' => 0,
 						'toggle-title' => 'Nearby Locations',
-						'updated' => strtotime('2020-08-05'),
+						'timeline-integration' => 0,
+						'timeline-signifier' => '*',
+						'updated' => strtotime('2020-10-25'),
 			);
 	
 	// set defaults for multi-site
@@ -321,13 +351,19 @@ function azrcrv_n_render_details_metabox() {
 											$dir = plugin_dir_path(__dir__).'/azrcrv-flags/images';
 											if (is_dir($dir)){
 												if ($directory = opendir($dir)){
+													$flags = array();
 													while (($file = readdir($directory)) !== false){
-														if ($file != '.' and $file != '..' and $file != 'Thumbs.db'){
-															$filewithoutext = preg_replace('/\\.[^.\\s]{3,4}$/', '', $file); ?>
-															<option value="<?php echo $filewithoutext ?>" <?php if($azrcrv_n_country == $filewithoutext){ echo ' selected="selected"'; } ?>><?php echo $filewithoutext; ?></option><?php
+														if ($file != '.' and $file != '..' and $file != 'Thumbs.db' and $file != 'index.php'){
+															$filewithoutext = preg_replace('/\\.[^.\\s]{3,4}$/', '', $file);
+															$flags[$filewithoutext] = azrcrv_f_get_country_name($filewithoutext);
 														}
 													}
 													closedir($directory);
+													asort($flags);
+												}
+				
+												foreach ($flags as $flag => $flagname){	
+													?><option value="<?php echo $flag ?>" <?php if($azrcrv_n_country == $flag){ echo ' selected="selected"'; } ?>><?php echo $flagname; ?></option><?php
 												}
 											}
 										?>
@@ -524,7 +560,7 @@ function azrcrv_n_display_options(){
 						<td>
 							<?php
 								if (azrcrv_n_is_plugin_active('azrcrv-flags/azrcrv-flags.php')){ ?>
-									<label for="enable-flags"><input name="enable-flags" type="checkbox" id="enable-flags" value="1" <?php checked('1', $options['enable-flags']); ?> /><?php _e('Enable integration with azurecurve Flags?', 'to-twitter'); ?></label>
+									<label for="enable-flags"><input name="enable-flags" type="checkbox" id="enable-flags" value="1" <?php checked('1', $options['enable-flags']); ?> /><?php _e('Enable integration with azurecurve Flags?', 'nearby'); ?></label>
 								<?php }else{
 									echo esc_html_e('Flags from azurecurve not installed/activated.', 'nearby');
 								}
@@ -538,7 +574,7 @@ function azrcrv_n_display_options(){
 						<td>
 							<?php
 								if (azrcrv_n_is_plugin_active('azrcrv-toggle-showhide/azrcrv-toggle-showhide.php')){ ?>
-									<label for="enable-toggle-showhide"><input name="enable-toggle-showhide" type="checkbox" id="enable-toggle-showhide" value="1" <?php checked('1', $options['enable-toggle-showhide']); ?> /><?php _e('Enable integration with azurecurve Toggle Show/Hide?', 'to-twitter'); ?></label>
+									<label for="enable-toggle-showhide"><input name="enable-toggle-showhide" type="checkbox" id="enable-toggle-showhide" value="1" <?php checked('1', $options['enable-toggle-showhide']); ?> /><?php _e('Enable integration with azurecurve Toggle Show/Hide?', 'nearby'); ?></label>
 								<?php }else{
 									echo esc_html_e('Toggle Show/Hide from azurecurve not installed/activated.', 'nearby');
 								}
@@ -553,6 +589,28 @@ function azrcrv_n_display_options(){
 							</td></tr>
 						<?php }
 					?>
+									
+					<tr>
+						<th scope="row">
+							<label for="timeline-integration"><?php esc_html_e('Integrate with Timelines from azurecurve', 'nearby'); ?></label></th>
+						<td>
+							<?php
+								if (azrcrv_n_is_plugin_active('azrcrv-timelines/azrcrv-timelines.php')){ ?>
+									<label for="timeline-integration"><input name="timeline-integration" type="checkbox" id="timeline-integration" value="1" <?php checked('1', $options['timeline-integration']); ?> /><?php _e('Enable integration with Timelines from azurecurve?', 'nearby'); ?></label>
+								<?php }else{
+									echo esc_html_e('Timelines from azurecurve not installed/activated.', 'nearby');
+								}
+								?>
+						</td>
+					</tr>
+					
+					<?php
+						if (azrcrv_n_is_plugin_active('azrcrv-timelines/azrcrv-timelines.php')){ ?>
+							<tr><th scope="row"><label for="timeline-signifier"><?php esc_html_e('Timeline Signifier', 'nearby'); ?></label></th><td>
+								<input name="timeline-signifier" type="text" id="timeline-signifier" value="<?php echo stripslashes($options['timeline-signifier']); ?>" class="small-text" /> <?php _e('Symbol to display next to nearby entries which have a timeline entry', 'nearby'); ?></td>
+							</td></tr>
+						<?php }
+					?>
 					
 					<tr><th scope="row" colspan=2>
 						<ul class='azrcrv-plugin-index'>
@@ -562,6 +620,15 @@ function azrcrv_n_display_options(){
 									echo "<a href='admin.php?page=azrcrv-f' class='azrcrv-plugin-index'>Flags</a>";
 								}else{
 									echo "<a href='https://development.azurecurve.co.uk/classicpress-plugins/flags/' class='azrcrv-plugin-index'>Flags</a>";
+								}
+								?>
+							</li>
+							<li>
+								<?php
+								if (azrcrv_n_is_plugin_active('azrcrv-timelines/azrcrv-timelines.php')){
+									echo "<a href='admin.php?page=azrcrv-t' class='azrcrv-plugin-index'>Timelines</a>";
+								}else{
+									echo "<a href='https://development.azurecurve.co.uk/classicpress-plugins/timelines/' class='azrcrv-plugin-index'>Timelines</a>";
 								}
 								?>
 							</li>
@@ -637,6 +704,18 @@ function azrcrv_n_save_options(){
 		}
 		
 		$option_name = 'toggle-title';
+		if (isset($_POST[$option_name])){
+			$options[$option_name] = sanitize_text_field($_POST[$option_name]);
+		}
+		
+		$option_name = 'timeline-integration';
+		if (isset($_POST[$option_name])){
+			$options[$option_name] = 1;
+		}else{
+			$options[$option_name] = 0;
+		}
+		
+		$option_name = 'timeline-signifier';
 		if (isset($_POST[$option_name])){
 			$options[$option_name] = sanitize_text_field($_POST[$option_name]);
 		}
@@ -727,7 +806,6 @@ function azrcrv_n_displaynearbylocations($atts, $content = null){
 			$max_locations = $options['maximum-locations'];
 		}
 		
-		
 		foreach ($nearby as $key => $value)  {
 			$attraction = get_page( $key );
 			$link = get_permalink( $key );
@@ -742,7 +820,26 @@ function azrcrv_n_displaynearbylocations($atts, $content = null){
 				$direction = azrcrv_n_getcompassdirectionthirtytwo($value['bearing']);
 			}
 			
-			$attractions .= '<tr><td class="azrcrv_n"><a href="'.$link.'">'.$attraction->post_title.' '.$country.'</a></td><td class="azrcrv_n">'.$value['distance'].' '.$options['unit-of-distance'].'</td><td class="azrcrv_n">'.$direction.'</td></tr>';
+			$timeline_signifier = '';
+			
+			if ($options['timeline-integration'] == 1){
+				$sql = "SELECT COUNT(pm.meta_value) FROM ".$wpdb->prefix."posts as p INNER JOIN ".$wpdb->prefix."postmeta AS pm ON pm.post_id = p.ID WHERE p.post_status = 'publish' AND p.post_type = 'timeline-entry' AND pm.meta_key = 'azc_t_metafields' AND pm.meta_value LIKE '%s'";//echo $sql.'<br />';
+				
+				$timeline_exists = $wpdb->get_var(
+										$wpdb->prepare(
+											$sql,
+											'%'.$link.'%'
+										)
+									);
+				
+				//$timeline_exists = $wpdb->get_results( $sql);
+				if ($timeline_exists >= 1){
+					$timeline_signifier = $options['timeline-signifier'];
+				}
+			}
+			
+			$attractions .= '<tr><td class="azrcrv_n"><a href="'.$link.'">'.$attraction->post_title.' '.$country.'</a>'.$timeline_signifier.'</td><td class="azrcrv_n">'.$value['distance'].' '.$options['unit-of-distance'].'</td><td class="azrcrv_n">'.$direction.'</td></tr>';
+			
 			$found++;
 			if ($found == $max_locations){ break; }
 		}

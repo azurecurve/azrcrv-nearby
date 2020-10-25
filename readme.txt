@@ -1,12 +1,12 @@
 === Nearby ===
 
 Description:	Creates table of nearby locations based on GPS co-ordinates.
-Version:		2.0.0
+Version:		2.1.0
 Tags:			location,gps
 Author:			azurecurve
 Author URI:		https://development.azurecurve.co.uk/
 Plugin URI:		https://development.azurecurve.co.uk/classicpress-plugins/nearby/
-Download link:	https://github.com/azurecurve/azrcrv-nearby/releases/download/v2.0.0/azrcrv-nearby.zip
+Download link:	https://github.com/azurecurve/azrcrv-nearby/releases/download/v2.1.0/azrcrv-nearby.zip
 Donate link:	https://development.azurecurve.co.uk/support-development/
 Requires PHP:	5.6
 Requires:		1.0.0
@@ -55,6 +55,11 @@ This plugin is developed for ClassicPress, but will likely work on WordPress.
 
 # Changelog
 
+### [Version 2.1.0](https://github.com/azurecurve/azrcrv-nearby/releases/tag/v2.1.0)
+ * Fix bug in update manager namespace declaration.
+ * Add integration with [Timelines](https://development.azurecurve.co.uk/classicpress-plugins/timelines/) from [azurecurve](https://development.azurecurve.co.uk/classicpress-plugins/).
+ * Add plugin icon and banner.
+
 ### [Version 2.0.0](https://github.com/azurecurve/azrcrv-nearby/releases/tag/v2.0.0)
  * Correct typo in maximum-location option which was maximim-locations; settings will need to be updated and saved once update applied.
 
@@ -79,5 +84,5 @@ Some of the top plugins available from **azurecurve** are:
 * [Breadcrumbs](https://development.azurecurve.co.uk/classicpress-plugins/breadcrumbs/)
 * [Series Index](https://development.azurecurve.co.uk/classicpress-plugins/series-index/)
 * [To Twitter](https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/)
-* [Theme Switches](https://development.azurecurve.co.uk/classicpress-plugins/theme-switcher/)
+* [Theme Switcher](https://development.azurecurve.co.uk/classicpress-plugins/theme-switcher/)
 * [Toggle Show/Hide](https://development.azurecurve.co.uk/classicpress-plugins/toggle-showhide/)
