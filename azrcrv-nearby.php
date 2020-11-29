@@ -3,7 +3,7 @@
  * ------------------------------------------------------------------------------
  * Plugin Name: Nearby
  * Description: Creates table of nearby locations based on GPS co-ordinates.
- * Version: 2.2.0
+ * Version: 2.3.0
  * Author: azurecurve
  * Author URI: https://development.azurecurve.co.uk/classicpress-plugins/
  * Plugin URI: https://development.azurecurve.co.uk/classicpress-plugins/nearby/
@@ -37,6 +37,7 @@ require_once(dirname(__FILE__).'/libraries/updateclient/UpdateClient.class.php')
  */
 // add actions
 add_action('admin_menu', 'azrcrv_n_create_admin_menu');
+add_action('admin_enqueue_scripts', 'azrcrv_n_load_admin_style');
 add_action('admin_post_azrcrv_n_save_options', 'azrcrv_n_save_options');
 add_action('the_posts', 'azrcrv_n_check_for_shortcode');
 add_action('plugins_loaded', 'azrcrv_n_load_languages');
@@ -153,10 +154,13 @@ function azrcrv_n_get_option($option_name){
 						'compass-type' => 16,
 						'unit-of-distance' => 'miles',
 						'enable-flags' => 0,
+						'flag-width' => 16,
 						'enable-toggle-showhide' => 0,
 						'toggle-title' => 'Nearby Locations',
 						'timeline-integration' => 0,
 						'timeline-signifier' => '*',
+						'icons-integration' => 0,
+						'icon-visited' => '',
 					);
 
 	$options = get_option($option_name, $defaults);
@@ -203,6 +207,19 @@ function azrcrv_n_create_admin_menu(){
 						,'manage_options'
 						,'azrcrv-n'
 						,'azrcrv_n_display_options');
+}
+
+/**
+ * Load css and jquery for flags.
+ *
+ * @since 2.3.0
+ *
+ */
+function azrcrv_n_load_admin_style(){
+    wp_register_style('nearby-css', plugins_url('assets/css/admin.css', __FILE__), false, '1.0.0');
+    wp_enqueue_style( 'nearby-css' );
+	
+	wp_enqueue_script("nearby-admin-js", plugins_url('assets/jquery/jquery.js', __FILE__), array('jquery', 'jquery-ui-core', 'jquery-ui-tabs'));
 }
 
 /**
@@ -272,23 +289,15 @@ function azrcrv_n_render_details_metabox() {
 									<select name="azrcrv_n_country">
 										<option value="" <?php if($azrcrv_n_country == ""){ echo ' selected="selected"'; } ?>></option>
 										<?php
-											$dir = plugin_dir_path(__dir__).'/azrcrv-flags/images';
-											if (is_dir($dir)){
-												if ($directory = opendir($dir)){
-													$flags = array();
-													while (($file = readdir($directory)) !== false){
-														if ($file != '.' and $file != '..' and $file != 'Thumbs.db' and $file != 'index.php'){
-															$filewithoutext = preg_replace('/\\.[^.\\s]{3,4}$/', '', $file);
-															$flags[$filewithoutext] = azrcrv_f_get_country_name($filewithoutext);
-														}
-													}
-													closedir($directory);
-													asort($flags);
+											$flags = azrcrv_f_get_flags();
+											
+											foreach ($flags as $flag_id => $flag){
+												if($azrcrv_n_country == $flag_id){
+													$selected = 'selected';
+												}else{
+													$selected = '';
 												}
-				
-												foreach ($flags as $flag => $flagname){	
-													?><option value="<?php echo $flag ?>" <?php if($azrcrv_n_country == $flag){ echo ' selected="selected"'; } ?>><?php echo $flagname; ?></option><?php
-												}
+												echo '<option value="'.esc_html($flag_id).'" '.$selected.'">'.esc_html($flag['name']).'</option>';
 											}
 										?>
 									</select>
@@ -444,134 +453,234 @@ function azrcrv_n_display_options(){
 				
 				<!-- Adding security through hidden referrer field -->
 				<?php wp_nonce_field('azrcrv-n', 'azrcrv-n-nonce'); ?>
-				<table class="form-table">
+			
+				<h2 class="nav-tab-wrapper nav-tab-wrapper-azrcrv-n">
+					<a class="nav-tab nav-tab-active" data-item=".tabs-1" href="#tabs-1"><?php _e('Default Settings', 'nearby') ?></a>
+					<a class="nav-tab" data-item=".tabs-2" href="#tabs-2"><?php _e('Integration', 'nearby') ?></a>
+					<input type="submit" style="float: left; margin: 6px; margin-bottom: 3px; float: right;  " value="<?php _e('Save Settings', 'nearby'); ?>" class="button-primary" id="submit" name="submit" />
+				</h2>
 				
-					<tr><th scope="row"><label for="nearby"><?php esc_html_e('Maximum Locations', 'nearby'); ?></label></th><td>
-						<input name="maximum-locations" type="number" step="1" min="1" id="maximum-locations" value="<?php echo stripslashes($options['maximum-locations']); ?>" class="small-text" /> locations</td>
-					</td></tr>
-					
-					<tr><th scope="row"><label for="nearby"><?php esc_html_e('Location Distance', 'nearby'); ?></label></th><td>
-						<input name="location-distance" type="number" step="1" min="1" id="location-distance" value="<?php echo stripslashes($options['location-distance']); ?>" class="small-text" /> <select name="unit-of-distance">
-							<?php
-								if ($options['unit-of-distance'] == 'km'){
-									echo '<option value="km" selected>km</option>';
-									echo '<option value="miles" >miles</option>';
-								}else{ // miles
-									echo '<option value="km" >km</option>';
-									echo '<option value="miles" selected >miles</option>';
-								}
-							?>
-						</select></td>
-					</td></tr>
-					
-					<tr><th scope="row"><label for="compass-type"><?php esc_html_e('Compass Type', 'nearby'); ?></label></th><td>
-						<select name="compass-type">
-							<?php
-								if ($options['compass-type'] == '16'){
-									echo '<option value="16" selected>16 point compass</option>';
-									echo '<option value="32" >32 point compass</option>';
-								}else{ // 32-wind compass
-									echo '<option value="16" >16 point compass</option>';
-									echo '<option value="32" selected >32 point compass</option>';
-								}
-							?>
-						</select></td>
-					</td></tr>
-									
-					<tr>
-						<th scope="row">
-							<label for="enable-flags"><?php esc_html_e('Integrate with Flags from azurecurve', 'nearby'); ?></label></th>
-						<td>
-							<?php
-								if (azrcrv_n_is_plugin_active('azrcrv-flags/azrcrv-flags.php')){ ?>
-									<label for="enable-flags"><input name="enable-flags" type="checkbox" id="enable-flags" value="1" <?php checked('1', $options['enable-flags']); ?> /><?php _e('Enable integration with azurecurve Flags?', 'nearby'); ?></label>
-								<?php }else{
-									echo esc_html_e('Flags from azurecurve not installed/activated.', 'nearby');
-								}
-								?>
-						</td>
-					</tr>
-									
-					<tr>
-						<th scope="row">
-							<label for="enable-toggle-showhide"><?php esc_html_e('Integrate with Toggle Show/Hide from azurecurve', 'nearby'); ?></label></th>
-						<td>
-							<?php
-								if (azrcrv_n_is_plugin_active('azrcrv-toggle-showhide/azrcrv-toggle-showhide.php')){ ?>
-									<label for="enable-toggle-showhide"><input name="enable-toggle-showhide" type="checkbox" id="enable-toggle-showhide" value="1" <?php checked('1', $options['enable-toggle-showhide']); ?> /><?php _e('Enable integration with azurecurve Toggle Show/Hide?', 'nearby'); ?></label>
-								<?php }else{
-									echo esc_html_e('Toggle Show/Hide from azurecurve not installed/activated.', 'nearby');
-								}
-								?>
-						</td>
-					</tr>
-					
-					<?php
-						if (azrcrv_n_is_plugin_active('azrcrv-toggle-showhide/azrcrv-toggle-showhide.php')){ ?>
-							<tr><th scope="row"><label for="toggle-title"><?php esc_html_e('Toggle Title', 'nearby'); ?></label></th><td>
-								<input name="toggle-title" type="text" step="1" min="1" id="toggle-title" value="<?php echo stripslashes($options['toggle-title']); ?>" class="regular-text" /></td>
+				<div>
+					<div class="azrcrv_n_tabs tabs-1">
+						
+						<label for="explanation">
+							<p>
+								<?php printf(esc_html__('%s and %s custom fields can be applied to a page to change the color of a specific pages appearance in the page index.', 'nearby'), 'azrcrv-pi-color', 'azrcrv-pi-background'); ?>
+							</p>
+							<p>
+								<?php esc_html_e('If the options are blank then the defaults in the plugin\'s CSS will be used.', 'nearby'); ?>
+							</p>
+						</label>
+						
+						<table class="form-table">
+						
+							<tr><th scope="row"><label for="nearby"><?php esc_html_e('Maximum Locations', 'nearby'); ?></label></th><td>
+								<input name="maximum-locations" type="number" step="1" min="1" id="maximum-locations" value="<?php echo stripslashes($options['maximum-locations']); ?>" class="small-text" /> locations</td>
 							</td></tr>
-						<?php }
-					?>
-									
-					<tr>
-						<th scope="row">
-							<label for="timeline-integration"><?php esc_html_e('Integrate with Timelines from azurecurve', 'nearby'); ?></label></th>
-						<td>
+							
+							<tr><th scope="row"><label for="nearby"><?php esc_html_e('Location Distance', 'nearby'); ?></label></th><td>
+								<input name="location-distance" type="number" step="1" min="1" id="location-distance" value="<?php echo stripslashes($options['location-distance']); ?>" class="small-text" /> <select name="unit-of-distance">
+									<?php
+										if ($options['unit-of-distance'] == 'km'){
+											echo '<option value="km" selected>km</option>';
+											echo '<option value="miles" >miles</option>';
+										}else{ // miles
+											echo '<option value="km" >km</option>';
+											echo '<option value="miles" selected >miles</option>';
+										}
+									?>
+								</select></td>
+							</td></tr>
+							
+							<tr><th scope="row"><label for="compass-type"><?php esc_html_e('Compass Type', 'nearby'); ?></label></th><td>
+								<select name="compass-type">
+									<?php
+										if ($options['compass-type'] == '16'){
+											echo '<option value="16" selected>16 point compass</option>';
+											echo '<option value="32" >32 point compass</option>';
+										}else{ // 32-wind compass
+											echo '<option value="16" >16 point compass</option>';
+											echo '<option value="32" selected >32 point compass</option>';
+										}
+									?>
+								</select></td>
+							</td></tr>
+							
+						</table>
+					</div>
+				
+					<div class="azrcrv_n_tabs invisible tabs-2">
+						
+						<table class="form-table">
+						
+							<tr>
+								<th scope="row">
+									<label for="enable-flags"><?php esc_html_e('Integrate with Flags from azurecurve', 'nearby'); ?></label></th>
+								<td>
+									<?php
+										if (azrcrv_n_is_plugin_active('azrcrv-flags/azrcrv-flags.php')){ ?>
+											<label for="enable-flags"><input name="enable-flags" type="checkbox" id="enable-flags" value="1" <?php checked('1', $options['enable-flags']); ?> /><?php _e('Enable integration with azurecurve Flags?', 'nearby'); ?></label>
+										<?php }else{
+											printf(esc_html__('%s from %s not installed/activated.', 'nearby'), 'Flags', 'azurecurve');
+										}
+										?>
+								</td>
+							</tr>
+							
+							<tr><th scope="row"><?php esc_html_e('Flag width?', 'nearby'); ?></th><td>
+								<fieldset><legend class="screen-reader-text"><span><?php esc_html_e('Flag width', 'nearby'); ?></span></legend>
+									<label for="flag-width"><input type="number" name="flag-width" class="small-text" value="<?php echo $options['flag-width']; ?>" />px</label>
+								</fieldset>
+							</td></tr>
+							
+						</table>
+					
+						<table class="form-table">
+							
+							<tr>
+								<th scope="row">
+									<label for="icons-integration">
+										<?php printf(esc_html__('Integrate with %s from %s', 'nearby'), '<a href="https://development.azurecurve.co.uk/classicpress-plugins/icons/">Icons</a>', '<a href="https://development.azurecurve.co.uk/classicpress-plugins/">azurecurve</a>'); ?>
+									</label>
+								</th>
+								<td>
+									<?php
+										if (azrcrv_pi_is_plugin_active('azrcrv-icons/azrcrv-icons.php')){ ?>
+											<label for="icons-integration"><input name="icons-integration" type="checkbox" id="icons-integration" value="1" <?php checked('1', $options['icons-integration']); ?> /><?php printf(esc_html__('Enable integration with %s from %s?', 'nearby'), 'Icons', 'azurecurve'); ?></label>
+										<?php }else{
+											printf(esc_html__('%s from %s not installed/activated.', 'nearby'), 'Icons', 'azurecurve');
+										}
+										?>
+								</td>
+							</tr>
+						
+						</table>
+						
+						<table class="form-table">
+						
+							<tr>
+								<th scope="row">
+									<label for="timeline-integration"><?php esc_html_e('Integrate with Timelines from azurecurve', 'nearby'); ?></label></th>
+								<td>
+									<?php
+										if (azrcrv_n_is_plugin_active('azrcrv-timelines/azrcrv-timelines.php')){ ?>
+											<label for="timeline-integration"><input name="timeline-integration" type="checkbox" id="timeline-integration" value="1" <?php checked('1', $options['timeline-integration']); ?> /><?php _e('Enable integration with Timelines from azurecurve?', 'nearby'); ?></label>
+										<?php }else{
+											printf(esc_html__('%s from %s not installed/activated.', 'nearby'), 'Timelines', 'azurecurve');
+										}
+										?>
+								</td>
+							</tr>
+							
 							<?php
 								if (azrcrv_n_is_plugin_active('azrcrv-timelines/azrcrv-timelines.php')){ ?>
-									<label for="timeline-integration"><input name="timeline-integration" type="checkbox" id="timeline-integration" value="1" <?php checked('1', $options['timeline-integration']); ?> /><?php _e('Enable integration with Timelines from azurecurve?', 'nearby'); ?></label>
-								<?php }else{
-									echo esc_html_e('Timelines from azurecurve not installed/activated.', 'nearby');
-								}
-								?>
-						</td>
-					</tr>
-					
-					<?php
-						if (azrcrv_n_is_plugin_active('azrcrv-timelines/azrcrv-timelines.php')){ ?>
-							<tr><th scope="row"><label for="timeline-signifier"><?php esc_html_e('Timeline Signifier', 'nearby'); ?></label></th><td>
-								<input name="timeline-signifier" type="text" id="timeline-signifier" value="<?php echo stripslashes($options['timeline-signifier']); ?>" class="small-text" /> <?php _e('Symbol to display next to nearby entries which have a timeline entry', 'nearby'); ?></td>
-							</td></tr>
-						<?php }
-					?>
-					
-					<tr><th scope="row" colspan=2>
-						<ul class='azrcrv-plugin-index'>
-							<li>
-								<?php
-								if (azrcrv_n_is_plugin_active('azrcrv-flags/azrcrv-flags.php')){
-									echo "<a href='admin.php?page=azrcrv-f' class='azrcrv-plugin-index'>Flags</a>";
-								}else{
-									echo "<a href='https://development.azurecurve.co.uk/classicpress-plugins/flags/' class='azrcrv-plugin-index'>Flags</a>";
-								}
-								?>
-							</li>
-							<li>
-								<?php
-								if (azrcrv_n_is_plugin_active('azrcrv-timelines/azrcrv-timelines.php')){
-									echo "<a href='admin.php?page=azrcrv-t' class='azrcrv-plugin-index'>Timelines</a>";
-								}else{
-									echo "<a href='https://development.azurecurve.co.uk/classicpress-plugins/timelines/' class='azrcrv-plugin-index'>Timelines</a>";
-								}
-								?>
-							</li>
-							<li>
-								<?php
-								if (azrcrv_n_is_plugin_active('azrcrv-toggle-showhide/azrcrv-toggle-showhide.php')){
-									echo "<a href='admin.php?page=azrcrv-tsh' class='azrcrv-plugin-index'>Toggle Show/Hide</a>";
-								}else{
-									echo "<a href='https://development.azurecurve.co.uk/classicpress-plugins/toggle-showhide/' class='azrcrv-plugin-index'>Toggle Show/Hide</a>";
-								}
-								?>
-							</li>
-						</ul>
-					</th></tr>
-				
-				</table>
+									<tr>
+										<th scope="row">
+											<label for="timeline-signifier">
+												<?php esc_html_e('Timeline Signifier', 'nearby'); ?>
+											</label>
+										</th>
+										<td>
+												<input name="timeline-signifier" type="text" id="timeline-signifier" value="<?php echo stripslashes($options['timeline-signifier']); ?>" class="small-text" />
+											<?php										
+											if (azrcrv_n_is_plugin_active('azrcrv-icons/azrcrv-icons.php') AND $options['icons-integration'] == 1){ ?>
+											or <select name="icon-visited">
+													<option value="" <?php if($options['icon-visited'] == ''){ echo ' selected="selected"'; } ?>>&nbsp;</option>
+													<?php						
+													$images = azrcrv_i_get_icons();
+													
+													foreach ($images as $image){
+														echo '<option value="'.esc_html($image).'" ';
+														if($options['icon-visited'] == esc_html($image)){ echo ' selected="selected"'; }
+														echo '>'.esc_html($image).'</option>';
+													}
+												echo '</select>';
+											}
+											?>
+											<p class="description"><?php esc_html_e('Symbol displayed next to nearby entries which have a timeline entry.', 'nearby'); ?></p>
+										</td>
+									</tr>
+								<?php }
+							?>
+							
+						</table>
+						
+						<table class="form-table">
+							
+							<tr>
+								<th scope="row">
+									<label for="enable-toggle-showhide"><?php esc_html_e('Integrate with Toggle Show/Hide from azurecurve', 'nearby'); ?></label></th>
+								<td>
+									<?php
+										if (azrcrv_n_is_plugin_active('azrcrv-toggle-showhide/azrcrv-toggle-showhide.php')){ ?>
+											<label for="enable-toggle-showhide"><input name="enable-toggle-showhide" type="checkbox" id="enable-toggle-showhide" value="1" <?php checked('1', $options['enable-toggle-showhide']); ?> /><?php _e('Enable integration with azurecurve Toggle Show/Hide?', 'nearby'); ?></label>
+										<?php }else{
+											echo esc_html_e('Toggle Show/Hide from azurecurve not installed/activated.', 'nearby');
+										}
+										?>
+								</td>
+							</tr>
+							
+							<?php
+								if (azrcrv_n_is_plugin_active('azrcrv-toggle-showhide/azrcrv-toggle-showhide.php')){ ?>
+									<tr><th scope="row"><label for="toggle-title"><?php esc_html_e('Toggle Title', 'nearby'); ?></label></th><td>
+										<input name="toggle-title" type="text" step="1" min="1" id="toggle-title" value="<?php echo stripslashes($options['toggle-title']); ?>" class="regular-text" /></td>
+									</td></tr>
+								<?php }
+							?>
+							
+						</table>
+					</div>
+				</div>
 				<input type="submit" value="Save Changes" class="button-primary"/>
 			</form>
 		</fieldset>
+	</div>
+	
+	<div>
+		<p>
+			<label for="additional-plugins">
+				<?php printf(esc_html__('This plugin integrates with the following plugins from %s:', 'nearby'), '<a href="https://development.azurecurve.co.uk/classicpress-plugins/">azurecurve</a>'); ?>
+			</label>
+			<ul class='azrcrv-plugin-index'>
+				<li>
+					<?php
+					if (azrcrv_n_is_plugin_active('azrcrv-flags/azrcrv-flags.php')){
+						echo '<a href="admin.php?page=azrcrv-f" class="azrcrv-plugin-index">Flags</a>';
+					}else{
+						echo '<a href="https://development.azurecurve.co.uk/classicpress-plugins/flags/" class="azrcrv-plugin-index">Flags</a>';
+					}
+					?>
+				</li>
+				<li>
+					<?php
+					if (azrcrv_n_is_plugin_active('azrcrv-icons/azrcrv-icons.php')){
+						echo '<a href="admin.php?page=azrcrv-i" class="azrcrv-plugin-index">Icons</a>';
+					}else{
+						echo '<a href="https://development.azurecurve.co.uk/classicpress-plugins/icons" class="azrcrv-plugin-index">Icons</a>';
+					}
+					?>
+				</li>
+				<li>
+					<?php
+					if (azrcrv_n_is_plugin_active('azrcrv-timelines/azrcrv-timelines.php')){
+						echo '<a href="admin.php?page=azrcrv-t" class="azrcrv-plugin-index">Timelines</a>';
+					}else{
+						echo '<a href="https://development.azurecurve.co.uk/classicpress-plugins/timelines/" class="azrcrv-plugin-index">Timelines</a>';
+					}
+					?>
+				</li>
+				<li>
+					<?php
+					if (azrcrv_n_is_plugin_active('azrcrv-toggle-showhide/azrcrv-toggle-showhide.php')){
+						echo "<a href='admin.php?page=azrcrv-tsh' class='azrcrv-plugin-index'>Toggle Show/Hide</a>";
+					}else{
+						echo "<a href='https://development.azurecurve.co.uk/classicpress-plugins/toggle-showhide/' class='azrcrv-plugin-index'>Toggle Show/Hide</a>";
+					}
+					?>
+				</li>
+			</ul>
+		</p>
 	</div>
 	<?php
 }
@@ -620,6 +729,11 @@ function azrcrv_n_save_options(){
 			$options[$option_name] = 0;
 		}
 		
+		$option_name = 'flag-width';
+		if (isset($_POST[$option_name])){
+			$options[$option_name] = sanitize_text_field(intval($_POST[$option_name]));
+		}
+		
 		$option_name = 'enable-toggle-showhide';
 		if (isset($_POST[$option_name])){
 			$options[$option_name] = 1;
@@ -640,6 +754,18 @@ function azrcrv_n_save_options(){
 		}
 		
 		$option_name = 'timeline-signifier';
+		if (isset($_POST[$option_name])){
+			$options[$option_name] = sanitize_text_field($_POST[$option_name]);
+		}
+		
+		$option_name = 'icons-integration';
+		if (isset($_POST[$option_name])){
+			$options[$option_name] = 1;
+		}else{
+			$options[$option_name] = 0;
+		}
+		
+		$option_name = 'icon-visited';
 		if (isset($_POST[$option_name])){
 			$options[$option_name] = sanitize_text_field($_POST[$option_name]);
 		}
@@ -733,10 +859,12 @@ function azrcrv_n_displaynearbylocations($atts, $content = null){
 		foreach ($nearby as $key => $value)  {
 			$attraction = get_page( $key );
 			$link = get_permalink( $key );
+			$country = '';
 			if (azrcrv_n_is_plugin_active('azrcrv-flags/azrcrv-flags.php') AND $options['enable-flags'] == 1){
-				$country = do_shortcode('[flag='.get_post_meta( $key, '_azrcrv_n_country', true ).']');
-			}else{
-				$country = '';
+				$country_code = get_post_meta($key, '_azrcrv_n_country', true);
+				if ($country_code != ''){
+					$country = azrcrv_f_flag(array( 'id' => $country_code, 'width' => $options['flag-width'].'px',));
+				}
 			}
 			if (isset($options['compass-type']) AND $options['compass-type'] == 16){
 				$direction = azrcrv_n_getcompassdirectionsixteen($value['bearing']);
@@ -745,20 +873,35 @@ function azrcrv_n_displaynearbylocations($atts, $content = null){
 			}
 			
 			$timeline_signifier = '';
-			
-			if ($options['timeline-integration'] == 1){
-				$sql = "SELECT COUNT(pm.meta_value) FROM ".$wpdb->prefix."posts as p INNER JOIN ".$wpdb->prefix."postmeta AS pm ON pm.post_id = p.ID WHERE p.post_status = 'publish' AND p.post_type = 'timeline-entry' AND pm.meta_key = 'azc_t_metafields' AND pm.meta_value LIKE '%s'";//echo $sql.'<br />';
+			$timeline_signifier_to_use = '';
+			if (azrcrv_n_is_plugin_active('azrcrv-timelines/azrcrv-timelines.php') AND $options['timeline-integration'] == 1){
 				
-				$timeline_exists = $wpdb->get_var(
-										$wpdb->prepare(
-											$sql,
-											'%'.$link.'%'
-										)
-									);
+				if (azrcrv_n_is_plugin_active('azrcrv-icons/azrcrv-icons.php') AND $options['icons-integration'] == 1){
+					if ($options['icon-visited'] != ''){
+						$timeline_signifier_to_use = azrcrv_i_icon(array($options['icon-visited']));
+					}
+				}
+				if (strlen($timeline_signifier_to_use) == 0){
+					$timeline_signifier_to_use = $options['timeline-signifier'];
+				}
 				
-				//$timeline_exists = $wpdb->get_results( $sql);
-				if ($timeline_exists >= 1){
-					$timeline_signifier = $options['timeline-signifier'];
+				if ($options['timeline-integration'] == 1){
+					$sql = "SELECT COUNT(pm.meta_value) FROM ".$wpdb->prefix."posts as p INNER JOIN ".$wpdb->prefix."postmeta AS pm ON pm.post_id = p.ID WHERE p.post_status = 'publish' AND p.post_type = 'timeline-entry' AND pm.meta_key = 'azc_t_metafields' AND pm.meta_value LIKE '%s'";
+					//echo $sql.'<br />';
+					
+					$timeline_exists = $wpdb->get_var(
+											$wpdb->prepare(
+												$sql,
+												'%'.$link.'%'
+											)
+										);
+					
+					//$timeline_exists = $wpdb->get_results( $sql);
+					if ($timeline_exists >= 1){
+						$timeline_signifier = '&nbsp;'.$timeline_signifier_to_use;
+					}else{
+						$timeline_signifier = '';
+					}
 				}
 			}
 			
