@@ -1,12 +1,12 @@
 === Nearby ===
 
 Description:	Creates table of nearby locations based on GPS co-ordinates.
-Version:		2.3.0
+Version:		2.4.0
 Tags:			location,gps
 Author:			azurecurve
 Author URI:		https://development.azurecurve.co.uk/
 Plugin URI:		https://development.azurecurve.co.uk/classicpress-plugins/nearby/
-Download link:	https://github.com/azurecurve/azrcrv-nearby/releases/download/v2.3.0/azrcrv-nearby.zip
+Download link:	https://github.com/azurecurve/azrcrv-nearby/releases/download/v2.4.0/azrcrv-nearby.zip
 Donate link:	https://development.azurecurve.co.uk/support-development/
 Requires PHP:	5.6
 Requires:		1.0.0
@@ -22,9 +22,21 @@ Allows a table of nearby locations to be created based on GPS co-ordinates.
 
 # Description
 
-Creates a table of nearby locations (pages) based on GPS co-ordinates; integrates with [Flags from azurecurve](https://development.azurecurve.co.uk/classicpress-plugins/flags/) and [Toggle Show/Hide from azurecurve](https://development.azurecurve.co.uk/classicpress-plugins/toggle-showhide/).
+Nearby creates a table of nearby locations (pages) based on GPS co-ordinates.
+
+Nearby integrates with the following [azurecurve](https://development.azurecurve.co.uk/classicpress-plugins/) plugins:
+ * [Flags from azurecurve](https://development.azurecurve.co.uk/classicpress-plugins/flags/) allows a location to be set for a page; this will display the location flag next to the location name in the table of nearby attractions.
+ * [Icons from azurecurve](https://development.azurecurve.co.uk/classicpress-plugins/icons/) allows an icon to be displayed next to a nearby location which has an entry on a timeline (requires integration with Timelines to be enabled).
+ * [Timelines from azurecurve](https://development.azurecurve.co.uk/classicpress-plugins/timelines/) allows a character (such as *) to be displayed next to a nearby location which has an entry on a timeline.
+ * [Toggle Show/Hide from azurecurve](https://development.azurecurve.co.uk/classicpress-plugins/toggle-showhide/) allows the table of nearby locations to be enclosed with a toggle.
 
 Apply the [nearby] shortcode to a page with co-ordinates and nearby locations (pages with co-ordinates), based on the settings, will be displayed in a table.
+
+The shortcode accepts two parameters:
+ * **type** to limit nearby attractions (multiple types can be provided in comma separated string)
+ * **title** to override the default toggle title
+
+Example shortcode usage: **[nearby type="Distilleries" title="Nearby Distilleries"]**
 
 Examples of this plugin in action:
 * [coppr|Distilleries To Visit](https://coppr.uk/distilleries/ireland/northern/echlinville/)
@@ -46,7 +58,7 @@ This plugin is multisite compatible; each site will need settings to be configur
 # Frequently Asked Questions
 
 ### Can I translate this plugin?
-Yes, the .pot fie is in the plugins languages folder and can also be downloaded from the plugin page on https://development.azurecurve.co.uk; if you do translate this plugin, please sent the .po and .mo files to translations@azurecurve.co.uk for inclusion in the next version (full credit will be given).
+Yes, the .pot file is in the plugins languages folder and can also be downloaded from the plugin page on https://development.azurecurve.co.uk; if you do translate this plugin, please sent the .po and .mo files to translations@azurecurve.co.uk for inclusion in the next version (full credit will be given).
 
 ### Is this plugin compatible with both WordPress and ClassicPress?
 This plugin is developed for ClassicPress, but will likely work on WordPress.
@@ -54,6 +66,14 @@ This plugin is developed for ClassicPress, but will likely work on WordPress.
 == Changelog ==
 
 # Changelog
+
+### [Version 2.4.0](https://github.com/azurecurve/azrcrv-nearby/releases/tag/v2.4.0)
+ * Add types; allows attractions to have a type set.
+ * Add **type** parameter to shortcode allowing included attractions to be limited.
+ * Add **title** parameter to shortcode allowing toggle title to be amended.
+ * Add plugin links to Integrate settings tab.
+ * Fix bug with display of selected country in page meta box.
+ * Fix table display bug when no nearby attractions.
 
 ### [Version 2.3.0](https://github.com/azurecurve/azrcrv-nearby/releases/tag/v2.3.0)
  * Amend call to get country flag.

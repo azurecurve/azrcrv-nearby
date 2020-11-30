@@ -3,7 +3,7 @@
  * ------------------------------------------------------------------------------
  * Plugin Name: Nearby
  * Description: Creates table of nearby locations based on GPS co-ordinates.
- * Version: 2.3.0
+ * Version: 2.4.0
  * Author: azurecurve
  * Author URI: https://development.azurecurve.co.uk/classicpress-plugins/
  * Plugin URI: https://development.azurecurve.co.uk/classicpress-plugins/nearby/
@@ -39,6 +39,8 @@ require_once(dirname(__FILE__).'/libraries/updateclient/UpdateClient.class.php')
 add_action('admin_menu', 'azrcrv_n_create_admin_menu');
 add_action('admin_enqueue_scripts', 'azrcrv_n_load_admin_style');
 add_action('admin_post_azrcrv_n_save_options', 'azrcrv_n_save_options');
+add_action('admin_post_azrcrv_n_add_type', 'azrcrv_n_add_type');
+add_action('admin_post_azrcrv_n_delete_type', 'azrcrv_n_delete_type');
 add_action('the_posts', 'azrcrv_n_check_for_shortcode');
 add_action('plugins_loaded', 'azrcrv_n_load_languages');
 add_action( 'add_meta_boxes', 'azrcrv_n_create_details_metabox' );
@@ -161,6 +163,8 @@ function azrcrv_n_get_option($option_name){
 						'timeline-signifier' => '*',
 						'icons-integration' => 0,
 						'icon-visited' => '',
+						'default-type' => '',
+						'default-shortcode-types' => array(),
 					);
 
 	$options = get_option($option_name, $defaults);
@@ -232,7 +236,7 @@ function azrcrv_n_create_details_metabox() {
 	// Must be repeated for each post type you want the metabox to appear on.
 	add_meta_box(
 		'azrcrv_n_metabox_details', // Metabox ID
-		'GPS Co-ordinates', // Title to display
+		sprintf(__('%s Details', 'nearby'), 'Nearby'), // Title to display
 		'azrcrv_n_render_details_metabox', // Function to call that contains the metabox content
 		'page', // Post type to display metabox on
 		'normal', // Where to put it (normal = main colum, side = sidebar, etc.)
@@ -247,8 +251,13 @@ function azrcrv_n_create_details_metabox() {
 function azrcrv_n_render_details_metabox() {
 	// Variables
 	global $post; // Get the current post data
+	
+	$options = azrcrv_n_get_option('azrcrv-n');
+	
 	$azrcrv_n_coordinates = get_post_meta( $post->ID, '_azrcrv_n_coordinates', true ); // Get the saved values
 	$azrcrv_n_country = get_post_meta( $post->ID, '_azrcrv_n_country', true ); // Get the saved values
+	$azrcrv_n_type = get_post_meta( $post->ID, '_azrcrv_n_type', true ); // Get the saved values
+	
 	?>
 
 		<fieldset>
@@ -275,36 +284,67 @@ function azrcrv_n_render_details_metabox() {
 								?>
 						</td>
 					</tr>
-					<?php
-						if (azrcrv_n_is_plugin_active('azrcrv-flags/azrcrv-flags.php')){ ?>
-							<tr>
-								<td style="width: 150px;">
-									<label for="azrcrv_n_country">
-										<?php
-											_e( 'Country', 'nearby' );
-										?>
-									</label>
-								</td>
-								<td style="width: 100%-150px;">
-									<select name="azrcrv_n_country">
-										<option value="" <?php if($azrcrv_n_country == ""){ echo ' selected="selected"'; } ?>></option>
-										<?php
-											$flags = azrcrv_f_get_flags();
-											
-											foreach ($flags as $flag_id => $flag){
-												if($azrcrv_n_country == $flag_id){
-													$selected = 'selected';
-												}else{
-													$selected = '';
-												}
-												echo '<option value="'.esc_html($flag_id).'" '.$selected.'">'.esc_html($flag['name']).'</option>';
+					
+					<?php if (azrcrv_n_is_plugin_active('azrcrv-flags/azrcrv-flags.php')){ ?>
+						<tr>
+							<td style="width: 150px;">
+								<label for="azrcrv_n_country">
+									<?php
+										_e( 'Location', 'nearby' );
+									?>
+								</label>
+							</td>
+							<td style="width: 100%-150px;">
+								<select name="azrcrv_n_country">
+									<option value="" <?php if($azrcrv_n_country == ""){ echo ' selected="selected"'; } ?>></option>
+									<?php
+										$flags = azrcrv_f_get_flags();
+										
+										foreach ($flags as $flag_id => $flag){
+											if ($azrcrv_n_country == $flag_id){
+												$selected = 'selected';
+											}else{
+												$selected = '';
 											}
-										?>
-									</select>
-								</td>
-							</tr>
-						<?php }
-					?>
+											echo '<option value="'.esc_html($flag_id).'" '.$selected.'>'.esc_html($flag['name']).'</option>';
+										}
+									?>
+								</select>
+							</td>
+						</tr>
+					<?php }	?>
+					
+					<?php
+					$types = get_option('azrcrv-n-types');
+					if (is_array($types) AND count($types) > 0){ ?>
+						<tr>
+							<td style="width: 150px;">
+								<label for="type">
+									<?php
+										_e( 'Type', 'nearby' );
+									?>
+								</label>
+							</td>
+							<td style="width: 100%-150px;">
+								<select name="azrcrv_n_type">
+									<option value="" <?php if($options['default-type'] == ""){ echo ' selected="selected"'; } ?>></option>
+									 
+									<?php
+										ksort($types);
+										
+										foreach ($types as $type_id => $type_name){
+											if ($type_id == $azrcrv_n_type){
+												$selected = 'selected';
+											}else{
+												$selected = '';
+											}
+											echo '<option value="'.esc_attr($type_id).'" '.$selected.'>'.esc_attr(stripslashes($type_name)).'</option>';
+										}
+									?>
+								</select>
+							</td>
+						</tr>
+					<?php } ?>
 				</table>
 			</div>
 		</fieldset>
@@ -348,6 +388,12 @@ function azrcrv_n_save_details_metabox( $post_id, $post ) {
 	$azrcrv_n_country = wp_filter_post_kses( $_POST['azrcrv_n_country'] );
 	// Save our submissions to the database
 	update_post_meta( $post->ID, '_azrcrv_n_country', $azrcrv_n_country );
+	/**
+	 * Sanitize the submitted data
+	 */
+	$azrcrv_n_type = wp_filter_post_kses( $_POST['azrcrv_n_type'] );
+	// Save our submissions to the database
+	update_post_meta( $post->ID, '_azrcrv_n_type', $azrcrv_n_type );
 
 }
 
@@ -436,8 +482,14 @@ function azrcrv_n_display_options(){
         wp_die(esc_html__('You do not have sufficient permissions to access this page.', 'nearby'));
     }
 	
+	global $wpdb;
+	
 	// Retrieve plugin configuration options from database
 	$options = azrcrv_n_get_option('azrcrv-n');
+	
+	$types = get_option('azrcrv-n-types');
+	if (is_array($types)){ ksort($types); }
+	
 	?>
 	<div id="azrcrv-n-general" class="wrap">
 		<fieldset>
@@ -446,6 +498,18 @@ function azrcrv_n_display_options(){
 				<div class="notice notice-success is-dismissible">
 					<p><strong><?php esc_html_e('Settings have been saved.', 'nearby'); ?></strong></p>
 				</div>
+			<?php }elseif(isset($_GET['type-added'])){ ?>
+				<div class="notice notice-success is-dismissible">
+					<p><strong><?php esc_html_e('New type has been successfully added.', 'nearby'); ?></strong></p>
+				</div>
+			<?php }elseif(isset($_GET['type-exists'])){ ?>
+				<div class="notice notice-error is-dismissible">
+					<p><strong><?php esc_html_e('Type already exists.', 'nearby'); ?></strong></p>
+				</div>
+			<?php }elseif(isset($_GET['type-deleted'])){ ?>
+				<div class="notice notice-success is-dismissible">
+					<p><strong><?php esc_html_e('Type has been successfully deleted.', 'nearby'); ?></strong></p>
+				</div>
 			<?php } ?>
 			<form method="post" action="admin-post.php">
 				<input type="hidden" name="action" value="azrcrv_n_save_options" />
@@ -453,24 +517,57 @@ function azrcrv_n_display_options(){
 				
 				<!-- Adding security through hidden referrer field -->
 				<?php wp_nonce_field('azrcrv-n', 'azrcrv-n-nonce'); ?>
+				
+				<?php
+					if(isset($_GET['types'])){
+						$tab1active = '';
+						$tab3active = 'nav-tab-active';
+						$tab1visibility = 'invisible';
+						$tab3visibility = '';
+					}else{
+						$tab1active = 'nav-tab-active';
+						$tab3active = '';
+						$tab1visibility = '';
+						$tab3visibility = 'invisible';
+					}
+				?>
 			
 				<h2 class="nav-tab-wrapper nav-tab-wrapper-azrcrv-n">
-					<a class="nav-tab nav-tab-active" data-item=".tabs-1" href="#tabs-1"><?php _e('Default Settings', 'nearby') ?></a>
+					<a class="nav-tab <?php echo $tab1active; ?>" data-item=".tabs-1" href="#tabs-1"><?php _e('Default Settings', 'nearby') ?></a>
 					<a class="nav-tab" data-item=".tabs-2" href="#tabs-2"><?php _e('Integration', 'nearby') ?></a>
-					<input type="submit" style="float: left; margin: 6px; margin-bottom: 3px; float: right;  " value="<?php _e('Save Settings', 'nearby'); ?>" class="button-primary" id="submit" name="submit" />
+					<a class="nav-tab <?php echo $tab3active; ?>" data-item=".tabs-3" href="#tabs-3"><?php _e('Types', 'nearby') ?></a>
 				</h2>
 				
 				<div>
-					<div class="azrcrv_n_tabs tabs-1">
+					<div class="azrcrv_n_tabs <?php echo $tab1visibility; ?> tabs-1">
 						
-						<label for="explanation">
-							<p>
-								<?php printf(esc_html__('%s and %s custom fields can be applied to a page to change the color of a specific pages appearance in the page index.', 'nearby'), 'azrcrv-pi-color', 'azrcrv-pi-background'); ?>
-							</p>
-							<p>
-								<?php esc_html_e('If the options are blank then the defaults in the plugin\'s CSS will be used.', 'nearby'); ?>
-							</p>
-						</label>
+						<p>
+							<?php printf(esc_html__('Nearby creates a table of nearby locations (pages) based on GPS co-ordinates and integrates with the following %s plugins:', 'nearby'), '<a href="https://development.azurecurve.co.uk/classicpress-plugins/">azurecurve</a>'); ?>
+							<ul class='azrcrv-n'>
+								<li><?php printf(esc_html__('%s allows a location to be set for a page; this will display the location flag next to the location name in the table of nearby attractions.', 'nearby'), '<a href="https://development.azurecurve.co.uk/classicpress-plugins/flags/">Flags</a>'); ?></li>
+								<li><?php printf(esc_html__('%s allows an icon to be displayed next to a nearby location which has an entry on a timeline (requires integration with %s to be enabled).', 'nearby'), '<a href="https://development.azurecurve.co.uk/classicpress-plugins/icons/">Icons</a>', '<em>Timelines</em>'); ?></li>
+								<li><?php printf(esc_html__('%s allows a character (such as *) to be displayed next to a nearby location which has an entry on a timeline.', 'nearby'), '<a href="https://development.azurecurve.co.uk/classicpress-plugins/timelines/">Timelines</a>'); ?></li>
+								<li><?php printf(esc_html__('%s allows the table of nearby locations to be enclosed with a toggle.', 'nearby'), '<a href="https://development.azurecurve.co.uk/classicpress-plugins/toggle-showhide/">Toggle Show/Hide</a>'); ?></li>
+							</ul>
+						</p>
+
+						<p><?php printf(esc_html__('Apply the %s shortcode to a page with co-ordinates and nearby locations (pages with co-ordinates), based on the settings, will be displayed in a table.', 'nearby'), '<strong>[nearby]</strong>'); ?></p>
+
+						<p><?php esc_html_e('The shortcode accepts two parameters', 'nearby'); ?>:
+							<ul>
+								<li><?php printf(esc_html__('%s to limit nearby attractions  (multiple types can be provided in comma separated string)', 'nearby'), '<strong>type</strong>'); ?></li>
+								<li><?php printf(esc_html__('%s to override the default toggle title', 'nearby'), '<strong>title</strong>'); ?></li>
+							</ul>
+						</p>
+
+						<p><?php printf(esc_html__('Example shortcode usage: %s', 'nearby'), '<strong>[nearby type="Distilleries" title="Nearby Distilleries"]</strong>'); ?></p>
+
+						<p><?php esc_html_e('Examples of this plugin in action:', 'nearby'); ?>
+							<ul>
+								<li><a href='https://coppr.uk/distilleries/ireland/northern/echlinville/'>coppr|Distilleries To Visit</a></li>
+								<li><a href='https://www.darkforge.co.uk/attractions/europe/republic-of-ireland/east/county-meath/newgrange-monument/'>DarkNexus|Tourist Attractions</a></li>
+							</ul>
+						</p>
 						
 						<table class="form-table">
 						
@@ -507,6 +604,70 @@ function azrcrv_n_display_options(){
 							</td></tr>
 							
 						</table>
+						
+						<table class="form-table">
+							
+							<tr>
+								<th scope="row">
+									<label for="default-type">
+										<?php esc_html_e('Default type', 'nearby'); ?>
+									</label>
+								</th>
+								<td>
+										<?php if (is_array($types) AND count($types) > 0){ ?>
+										<select name="default-type">
+											 
+											<option value="" <?php if($options['default-type'] == ""){ echo ' selected="selected"'; } ?>></option>
+											<?php
+												
+												foreach ($types as $type_id => $type_name){
+													if ($type_id == $options['default-type']){
+														$selected = 'selected';
+													}else{
+														$selected = '';
+													}
+													echo '<option value="'.esc_attr($type_id).'" '.$selected.'>'.esc_attr(stripslashes($type_name)).'</option>';
+												}
+											?>
+										</select>
+										<p class="description"><?php esc_html_e('Default type for new nearby locations.', 'nearby'); ?></p>
+									<?php }else{
+										_e('Add some types to select a default.', 'nearby');
+									} ?>
+								</td>
+							</tr>
+							
+							<tr>
+								<th scope="row">
+									<label for="default-shortcode-types">
+										<?php esc_html_e('Default shortcode types', 'nearby'); ?>
+									</label>
+								</th>
+								<td>
+									<?php if (is_array($types) AND count($types) > 0){ ?>
+										<select name="default-shortcode-types[]" multiple>
+											 
+											<option value="" <?php if(in_array("",$options['default-shortcode-types'])){ echo ' selected="selected"'; } ?>></option>
+											<?php
+												foreach ($types as $type_id => $type_name){
+													if (in_array($type_id, $options['default-shortcode-types'])){
+														$selected = 'selected';
+													}else{
+														$selected = '';
+													}
+													echo '<option value="'.esc_attr($type_id).'" '.$selected.'>'.esc_attr(stripslashes($type_name)).'</option>';
+												}
+											?>
+										</select>
+										<p class="description"><?php printf(esc_html__('Hold down %s to select multiple types.', 'nearby'), 'Control/Command'); ?></p>
+									<?php }else{
+										_e('Add some types to select default shortcode types.', 'nearby');
+									} ?>
+								</td>
+							</tr>
+							
+						</table>
+				<input type="submit" value="Save Changes" class="button-primary"/>
 					</div>
 				
 					<div class="azrcrv_n_tabs invisible tabs-2">
@@ -515,11 +676,14 @@ function azrcrv_n_display_options(){
 						
 							<tr>
 								<th scope="row">
-									<label for="enable-flags"><?php esc_html_e('Integrate with Flags from azurecurve', 'nearby'); ?></label></th>
+									<label for="enable-flags">
+										<?php printf(esc_html__('Integrate with %s from %s', 'nearby'), '<a href="https://development.azurecurve.co.uk/classicpress-plugins/flags/">Flags</a>', '<a href="https://development.azurecurve.co.uk/classicpress-plugins/">azurecurve</a>'); ?>
+									</label>
+								</th>
 								<td>
 									<?php
 										if (azrcrv_n_is_plugin_active('azrcrv-flags/azrcrv-flags.php')){ ?>
-											<label for="enable-flags"><input name="enable-flags" type="checkbox" id="enable-flags" value="1" <?php checked('1', $options['enable-flags']); ?> /><?php _e('Enable integration with azurecurve Flags?', 'nearby'); ?></label>
+											<label for="enable-flags"><input name="enable-flags" type="checkbox" id="enable-flags" value="1" <?php checked('1', $options['enable-flags']); ?> /><?php printf(esc_html__('Enable integration with %s from %s?', 'nearby'), 'Flags', 'azurecurve'); ?></label>
 										<?php }else{
 											printf(esc_html__('%s from %s not installed/activated.', 'nearby'), 'Flags', 'azurecurve');
 										}
@@ -527,7 +691,7 @@ function azrcrv_n_display_options(){
 								</td>
 							</tr>
 							
-							<tr><th scope="row"><?php esc_html_e('Flag width?', 'nearby'); ?></th><td>
+							<tr><th scope="row"><?php esc_html_e('Flag width', 'nearby'); ?></th><td>
 								<fieldset><legend class="screen-reader-text"><span><?php esc_html_e('Flag width', 'nearby'); ?></span></legend>
 									<label for="flag-width"><input type="number" name="flag-width" class="small-text" value="<?php echo $options['flag-width']; ?>" />px</label>
 								</fieldset>
@@ -560,11 +724,14 @@ function azrcrv_n_display_options(){
 						
 							<tr>
 								<th scope="row">
-									<label for="timeline-integration"><?php esc_html_e('Integrate with Timelines from azurecurve', 'nearby'); ?></label></th>
+									<label for="timeline-integration">
+										<?php printf(esc_html__('Integrate with %s from %s', 'nearby'), '<a href="https://development.azurecurve.co.uk/classicpress-plugins/timelines/">Timelines</a>', '<a href="https://development.azurecurve.co.uk/classicpress-plugins/">azurecurve</a>'); ?>
+									</label>
+								</th>
 								<td>
 									<?php
 										if (azrcrv_n_is_plugin_active('azrcrv-timelines/azrcrv-timelines.php')){ ?>
-											<label for="timeline-integration"><input name="timeline-integration" type="checkbox" id="timeline-integration" value="1" <?php checked('1', $options['timeline-integration']); ?> /><?php _e('Enable integration with Timelines from azurecurve?', 'nearby'); ?></label>
+											<label for="timeline-integration"><input name="timeline-integration" type="checkbox" id="timeline-integration" value="1" <?php checked('1', $options['timeline-integration']); ?> /><?php printf(esc_html__('Enable integration with %s from %s?', 'nearby'), 'Timelines', 'azurecurve'); ?></label>
 										<?php }else{
 											printf(esc_html__('%s from %s not installed/activated.', 'nearby'), 'Timelines', 'azurecurve');
 										}
@@ -581,7 +748,7 @@ function azrcrv_n_display_options(){
 											</label>
 										</th>
 										<td>
-												<input name="timeline-signifier" type="text" id="timeline-signifier" value="<?php echo stripslashes($options['timeline-signifier']); ?>" class="small-text" />
+											<input name="timeline-signifier" type="text" id="timeline-signifier" value="<?php echo stripslashes($options['timeline-signifier']); ?>" class="small-text" />
 											<?php										
 											if (azrcrv_n_is_plugin_active('azrcrv-icons/azrcrv-icons.php') AND $options['icons-integration'] == 1){ ?>
 											or <select name="icon-visited">
@@ -609,11 +776,14 @@ function azrcrv_n_display_options(){
 							
 							<tr>
 								<th scope="row">
-									<label for="enable-toggle-showhide"><?php esc_html_e('Integrate with Toggle Show/Hide from azurecurve', 'nearby'); ?></label></th>
+									<label for="enable-toggle-showhide">
+										<?php printf(esc_html__('Integrate with %s from %s', 'nearby'), '<a href="https://development.azurecurve.co.uk/classicpress-plugins/toggle-showhide/">Toggle Show/Hide</a>', '<a href="https://development.azurecurve.co.uk/classicpress-plugins/">azurecurve</a>'); ?>
+									</label>
+								</th>
 								<td>
 									<?php
 										if (azrcrv_n_is_plugin_active('azrcrv-toggle-showhide/azrcrv-toggle-showhide.php')){ ?>
-											<label for="enable-toggle-showhide"><input name="enable-toggle-showhide" type="checkbox" id="enable-toggle-showhide" value="1" <?php checked('1', $options['enable-toggle-showhide']); ?> /><?php _e('Enable integration with azurecurve Toggle Show/Hide?', 'nearby'); ?></label>
+											<label for="enable-toggle-showhide"><input name="enable-toggle-showhide" type="checkbox" id="enable-toggle-showhide" value="1" <?php checked('1', $options['enable-toggle-showhide']); ?> /><?php printf(esc_html__('Enable integration with %s from %s?', 'nearby'), 'Toggle Show/Hide', 'azurecurve'); ?></label></label>
 										<?php }else{
 											echo esc_html_e('Toggle Show/Hide from azurecurve not installed/activated.', 'nearby');
 										}
@@ -623,17 +793,99 @@ function azrcrv_n_display_options(){
 							
 							<?php
 								if (azrcrv_n_is_plugin_active('azrcrv-toggle-showhide/azrcrv-toggle-showhide.php')){ ?>
-									<tr><th scope="row"><label for="toggle-title"><?php esc_html_e('Toggle Title', 'nearby'); ?></label></th><td>
-										<input name="toggle-title" type="text" step="1" min="1" id="toggle-title" value="<?php echo stripslashes($options['toggle-title']); ?>" class="regular-text" /></td>
-									</td></tr>
+									<tr>
+										<th scope="row">
+											<label for="toggle-title">
+												<?php esc_html_e('Toggle Title', 'nearby'); ?>
+											</label>
+										</th>
+										<td>
+											<input name="toggle-title" type="text" id="toggle-title" value="<?php echo stripslashes($options['toggle-title']); ?>" class="regular-text" />
+										</td>
+									</tr>
 								<?php }
 							?>
 							
 						</table>
+						<input type="submit" value="Save Changes" class="button-primary"/>
 					</div>
-				</div>
-				<input type="submit" value="Save Changes" class="button-primary"/>
 			</form>
+					
+				<div class="azrcrv_n_tabs <?php echo $tab3visibility; ?> tabs-3">
+					
+					<form method="post" action="admin-post.php" enctype="multipart/form-data">
+						<input type="hidden" name="action" value="azrcrv_n_add_type" />
+					
+						<table class="form-table">
+							
+							<tr>
+								<th scope="row">
+									<label for="new-type">
+										<?php esc_html_e('Add new type', 'nearby'); ?>
+									</label>
+								</th>
+								<td>
+									<input name="new-type" type="text" id="new-type" value="" class="regular-text" /><input type="image" src="<?php echo plugin_dir_url(__FILE__); ?>assets/images/add.png" name="add" title="Add" alt="Add" value="Add" class="azrcrv-n" />
+								</td>
+							</tr>
+							
+						</table>
+					
+						<?php wp_nonce_field('azrcrv-n-add-type', 'azrcrv-n-nonce-add-type'); ?>
+						<input type="hidden" name="azrcrv_n_add_type" value="yes" />
+					</form>
+					
+					<table class="form-table">
+						
+						<tr>
+							<th scope="row">
+								<label for="delete-type">
+									<?php esc_html_e('Existing types', 'nearby'); ?>
+								</label>
+							</th>
+							<td>
+								<?php
+								if (is_array($types) AND count($types) > 0){
+									foreach ($types as $type_id => $type_name){
+										echo '<form method="post" action="admin-post.php" enctype="multipart/form-data">';
+										echo  '<input name="delete-type-desc" type="text" id="delete-type-desc" value="'.esc_attr(stripslashes($type_name)).'" class="regular-text" disabled />&nbsp;';
+										
+										$page_count = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $wpdb->postmeta WHERE meta_key = '_azrcrv_n_type' AND meta_value = '%s';", $type_id)); 
+										
+										$locked_message = '';
+										if ($type_id == $options['default-type']){
+											$locked_message = 'Default';
+										}elseif (in_array($type_id, $options['default-shortcode-types'])){
+											$locked_message = 'Default for shortcodes';
+										}elseif ($page_count > 0){
+											$locked_message = $page_count.' assignment';
+											if ($page_count > 1){
+												$locked_message .= 's';
+											}
+										}
+										
+										if ($locked_message == ''){
+											echo '<input type="image" src="'.plugin_dir_url(__FILE__).'assets/images/delete.png" name="delete" title="Delete" alt="Delete" value="Delete" class="azrcrv-n" />';
+										}else{
+											echo '&nbsp;<img src="'.plugin_dir_url(__FILE__).'assets/images/lock.png" name="lock" title="Locked: '.$locked_message.'" alt="Locked: '.$page_count.'" class="azrcrv-n" />';
+										}
+										
+										echo '<input type="hidden" name="action" value="azrcrv_n_delete_type" />';
+										echo '<input type="hidden" name="delete-type" value="'.esc_attr(stripslashes($type_id)).'" class="short-text" />';
+										wp_nonce_field('azrcrv-n-delete-type', 'azrcrv-n-nonce-delete-type');
+										echo '<input type="hidden" name="azrcrv_n_delete_type" value="yes" />';
+										echo '</form>';
+									}
+									echo '<p class="description">'.__('Types assigned to pages or set as defaults cannot be deleted.', 'nearby').'</p>';
+								}else{
+									echo __('No types have been added.', 'nearby');
+								}
+								?>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
 		</fieldset>
 	</div>
 	
@@ -770,11 +1022,87 @@ function azrcrv_n_save_options(){
 			$options[$option_name] = sanitize_text_field($_POST[$option_name]);
 		}
 		
+		$option_name = 'default-type';
+		if (isset($_POST[$option_name])){
+			$options[$option_name] = sanitize_text_field($_POST[$option_name]);
+		}
+		
+		$option_name = 'default-shortcode-types';
+		if (is_array($_POST[$option_name])){
+			$options[$option_name] = array_map( 'strip_tags', $_POST[$option_name] );
+			
+		}
+		
 		// Store updated options array to database
 		update_option('azrcrv-n', $options);
 		
 		// Redirect the page to the configuration form that was processed
 		wp_redirect(add_query_arg('page', 'azrcrv-n&settings-updated', admin_url('admin.php')));
+		exit;
+	}
+}
+
+/**
+ * Add type.
+ *
+ * @since 2.4.0
+ *
+ */
+function azrcrv_n_add_type(){
+	// Check that user has proper security level
+	if (!current_user_can('manage_options')){
+		wp_die(esc_html__('You do not have permissions to perform this action', 'nearby'));
+	}
+	// Check that nonce field created in configuration form is present
+	if (! empty($_POST) && check_admin_referer('azrcrv-n-add-type', 'azrcrv-n-nonce-add-type')){
+	
+		// Retrieve original plugin options array
+		$options = get_option('azrcrv-n-types');
+		
+		$option_name = 'new-type';
+		if (isset($options[strtolower(sanitize_text_field($_POST[$option_name]))])){
+			$action = 'type-exists';
+		}elseif (isset($_POST[$option_name])){
+			$options[strtolower(sanitize_text_field($_POST[$option_name]))] = sanitize_text_field($_POST[$option_name]);
+		
+			// Store updated options array to database
+			update_option('azrcrv-n-types', $options);
+			$action = 'type-added';
+		}
+		
+		// Redirect the page to the configuration form that was processed
+		wp_redirect(add_query_arg('page', 'azrcrv-n&'.$action.'&types#tabs-3', admin_url('admin.php')));
+		exit;
+	}
+}
+
+/**
+ * Delete type.
+ *
+ * @since 2.4.0
+ *
+ */
+function azrcrv_n_delete_type(){
+	// Check that user has proper security level
+	if (!current_user_can('manage_options')){
+		wp_die(esc_html__('You do not have permissions to perform this action', 'nearby'));
+	}
+	// Check that nonce field created in configuration form is present
+	if (! empty($_POST) && check_admin_referer('azrcrv-n-delete-type', 'azrcrv-n-nonce-delete-type')){
+	
+		// Retrieve original plugin options array
+		$options = get_option('azrcrv-n-types');
+		
+		$option_name = 'delete-type';
+		if (isset($_POST[$option_name])){
+			unset($options[strtolower(sanitize_text_field($_POST[$option_name]))]);
+		}
+		
+		// Store updated options array to database
+		update_option('azrcrv-n-types', $options);
+		
+		// Redirect the page to the configuration form that was processed
+		wp_redirect(add_query_arg('page', 'azrcrv-n&type-deleted&types#tabs-3', admin_url('admin.php')));
 		exit;
 	}
 }
@@ -792,6 +1120,21 @@ function azrcrv_n_displaynearbylocations($atts, $content = null){
 	global $post; // Get the current post data
 	
 	$options = azrcrv_n_get_option('azrcrv-n');
+	
+	// get shortcode attributes
+	$args = shortcode_atts(array(
+		'type' => implode(',', $options['default-shortcode-types']),
+		'title' => $options['toggle-title'],
+	), $atts);
+	$type = explode(',', strtolower(stripslashes($args['type'])));
+	$toggle_title = $args['title'];
+	
+	$types = get_option('azrcrv-n-types');
+	if (is_array($types)){
+		$type_count = count($types);
+	}else{
+		$type_count = 0;
+	}
 	
 	if ($options['unit-of-distance'] == 'km'){
 		$units = '* 1.609344';
@@ -812,10 +1155,10 @@ function azrcrv_n_displaynearbylocations($atts, $content = null){
 						COS(RADIANS(TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(PMO.meta_value, ',', 2), ',', -1))-TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(PM.meta_value, ',', 2), ',', -1))))
 				  ))
 				 ) % 360.0 AS BEARING
-				FROM ".$wpdb->prefix."postmeta AS PM 
-				INNER JOIN ".$wpdb->prefix."posts AS P ON P.ID = PM.post_id AND P.post_status = 'publish' AND P.post_type = 'page'
-				INNER JOIN ".$wpdb->prefix."postmeta AS PMO ON PMO.meta_key = PM.meta_key AND PMO.post_id <> PM.post_id 
-				INNER JOIN ".$wpdb->prefix."posts AS PO ON PO.ID = PMO.post_id  AND PO.post_status = 'publish' AND PO.post_type = 'page'
+				FROM $wpdb->postmeta AS PM 
+				INNER JOIN $wpdb->posts AS P ON P.ID = PM.post_id AND P.post_status = 'publish' AND P.post_type = 'page'
+				INNER JOIN $wpdb->postmeta AS PMO ON PMO.meta_key = PM.meta_key AND PMO.post_id <> PM.post_id 
+				INNER JOIN $wpdb->posts AS PO ON PO.ID = PMO.post_id  AND PO.post_status = 'publish' AND PO.post_type = 'page'
 				WHERE 
 					PM.post_id = %d 
 				AND 
@@ -825,9 +1168,9 @@ function azrcrv_n_displaynearbylocations($atts, $content = null){
 				AND 
 					LENGTH(PMO.meta_value > 0) 
 				HAVING 
-					DISTANCE <= ".$options['location-distance'];
-					
-		$sql = $wpdb->prepare($sql, $post->ID);
+					DISTANCE <= %d";
+		
+		$sql = $wpdb->prepare($sql, $post->ID, $options['location-distance']);
 		
 		//echo $sql.'<p />';
 		$nearby = array();
@@ -835,7 +1178,18 @@ function azrcrv_n_displaynearbylocations($atts, $content = null){
 		$resultset_table = $wpdb->get_results( $sql );
 		
 		foreach ($resultset_table as $result_table){
-			$nearby[$result_table->post_id] = array('distance' => $result_table->DISTANCE, 'bearing' => $result_table->BEARING);
+			$result_type = get_post_meta( $result_table->post_id, '_azrcrv_n_type', true ); // Get the saved values
+			
+			$include = false;
+			if ($type_count == 0){
+				$include = true;
+			}elseif (in_array(strtolower($result_type), $type)){
+				$include = true;
+			}
+			
+			if ($include == true){
+				$nearby[$result_table->post_id] = array('distance' => $result_table->DISTANCE, 'bearing' => $result_table->BEARING);
+			}
 		}
 		
 		asort($nearby);
@@ -912,13 +1266,13 @@ function azrcrv_n_displaynearbylocations($atts, $content = null){
 		}
 		
 		if ($found == 0){
-			$attractions .= '<tr><td colspan=2 style="border: 1px solid #38464b; ">No nearby attractions were found.</td></tr>';
+			$attractions .= '<tr><td colspan=3 style="border: 1px solid #38464b; ">No nearby attractions were found.</td></tr>';
 		}
 		
 		$attractions .= '</table>';
 		
 		if (azrcrv_n_is_plugin_active('azrcrv-toggle-showhide/azrcrv-toggle-showhide.php') AND $options['enable-toggle-showhide']){
-			$output = do_shortcode('[toggle title="'.$options['toggle-title'].'"]'.$attractions.'[/toggle]');
+			$output = do_shortcode('[toggle title="'.$toggle_title.'"]'.$attractions.'[/toggle]');
 		}else{
 			$output = $attractions;
 		}
