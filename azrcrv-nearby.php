@@ -3,7 +3,7 @@
  * ------------------------------------------------------------------------------
  * Plugin Name: Nearby
  * Description: Creates table of nearby locations based on GPS co-ordinates.
- * Version: 2.4.0
+ * Version: 2.4.1
  * Author: azurecurve
  * Author URI: https://development.azurecurve.co.uk/classicpress-plugins/
  * Plugin URI: https://development.azurecurve.co.uk/classicpress-plugins/nearby/
@@ -750,16 +750,16 @@ function azrcrv_n_display_options(){
 										<td>
 											<input name="timeline-signifier" type="text" id="timeline-signifier" value="<?php echo stripslashes($options['timeline-signifier']); ?>" class="small-text" />
 											<?php										
-											if (azrcrv_n_is_plugin_active('azrcrv-icons/azrcrv-icons.php') AND $options['icons-integration'] == 1){ ?>
-											or <select name="icon-visited">
+											if (azrcrv_n_is_plugin_active('azrcrv-icons/azrcrv-icons.php') AND $options['icons-integration'] == 1){
+											_e('or', 'nearby'); ?> <select name="icon-visited">
 													<option value="" <?php if($options['icon-visited'] == ''){ echo ' selected="selected"'; } ?>>&nbsp;</option>
 													<?php						
-													$images = azrcrv_i_get_icons();
+													$icons = azrcrv_i_get_icons();
 													
-													foreach ($images as $image){
-														echo '<option value="'.esc_html($image).'" ';
-														if($options['icon-visited'] == esc_html($image)){ echo ' selected="selected"'; }
-														echo '>'.esc_html($image).'</option>';
+													foreach ($icons as $icon_id => $icon){
+														echo '<option value="'.esc_html($icon_id).'" ';
+														if($options['icon-visited'] == esc_html($icon_id)){ echo ' selected="selected"'; }
+														echo '>'.esc_html($icon_id).'</option>';
 													}
 												echo '</select>';
 											}
