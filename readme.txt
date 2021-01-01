@@ -68,9 +68,9 @@ This plugin is developed for ClassicPress, but will likely work on WordPress.
 # Changelog
 
 ### [Version 2.4.2](https://github.com/azurecurve/azrcrv-nearby/releases/tag/v2.4.2)
- * Fix bug withtimeline integration not returning correct result.
+ * Fix bug with timeline integration not returning correct result.
  * Update azurecurve menu.
- * Replace azurecurve emnu icon with svg.
+ * Replace azurecurve menu icon with svg.
  
 ### [Version 2.4.1](https://github.com/azurecurve/azrcrv-nearby/releases/tag/v2.4.1)
  * Fix bug with available icons not listing when [Icons](https://development.azurecurve.co.uk/classicpress-plugins/icons/) integration enabled.
