@@ -370,6 +370,13 @@ if (!function_exists('azrcrv_populate_plugin_menu_n')){
 				'retired' => 0,
 				'updated' => '2020-04-04',
 			),
+			'SMTP' => array(
+				'plugin_link' => 'azrcrv-smtp/azrcrv-smtp.php',
+				'admin_URL' => 'admin.php?page=azrcrv-smtp',
+				'dev_URL' => 'https://development.azurecurve.co.uk/classicpress-plugins/smtp/',
+				'retired' => 0,
+				'updated' => '2020-01-28',
+			),
 			'Snippets' => array(
 				'plugin_link' => 'azrcrv-snippets/azrcrv-snippets.php',
 				'admin_URL' => 'admin.php?page=azrcrv-s',

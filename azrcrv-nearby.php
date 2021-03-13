@@ -709,7 +709,7 @@ function azrcrv_n_display_options(){
 								</th>
 								<td>
 									<?php
-										if (azrcrv_pi_is_plugin_active('azrcrv-icons/azrcrv-icons.php')){ ?>
+										if (azrcrv_n_is_plugin_active('azrcrv-icons/azrcrv-icons.php')){ ?>
 											<label for="icons-integration"><input name="icons-integration" type="checkbox" id="icons-integration" value="1" <?php checked('1', $options['icons-integration']); ?> /><?php printf(esc_html__('Enable integration with %s from %s?', 'nearby'), 'Icons', 'azurecurve'); ?></label>
 										<?php }else{
 											printf(esc_html__('%s from %s not installed/activated.', 'nearby'), 'Icons', 'azurecurve');
