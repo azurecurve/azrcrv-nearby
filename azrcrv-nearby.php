@@ -3,7 +3,7 @@
  * ------------------------------------------------------------------------------
  * Plugin Name: Nearby
  * Description: Creates table of nearby locations based on GPS co-ordinates.
- * Version: 2.4.4
+ * Version: 2.5.0
  * Author: azurecurve
  * Author URI: https://development.azurecurve.co.uk/classicpress-plugins/
  * Plugin URI: https://development.azurecurve.co.uk/classicpress-plugins/nearby/
@@ -493,7 +493,12 @@ function azrcrv_n_display_options(){
 	?>
 	<div id="azrcrv-n-general" class="wrap">
 		<fieldset>
-			<h1><?php echo esc_html(get_admin_page_title()); ?></h1>
+			<h1>
+				<?php
+					echo '<a href="https://development.azurecurve.co.uk/classicpress-plugins/"><img src="'.plugins_url('/pluginmenu/images/logo.svg', __FILE__).'" style="padding-right: 6px; height: 20px; width: 20px;" alt="azurecurve" /></a>';
+					esc_html_e(get_admin_page_title());
+				?>
+			</h1>
 			<?php if(isset($_GET['settings-updated'])){ ?>
 				<div class="notice notice-success is-dismissible">
 					<p><strong><?php esc_html_e('Settings have been saved.', 'nearby'); ?></strong></p>
@@ -533,9 +538,9 @@ function azrcrv_n_display_options(){
 				?>
 			
 				<h2 class="nav-tab-wrapper nav-tab-wrapper-azrcrv-n">
-					<a class="nav-tab <?php echo $tab1active; ?>" data-item=".tabs-1" href="#tabs-1"><?php _e('Default Settings', 'nearby') ?></a>
-					<a class="nav-tab" data-item=".tabs-2" href="#tabs-2"><?php _e('Integration', 'nearby') ?></a>
-					<a class="nav-tab <?php echo $tab3active; ?>" data-item=".tabs-3" href="#tabs-3"><?php _e('Types', 'nearby') ?></a>
+					<a class="nav-tab <?php echo $tab1active; ?>" data-item=".tabs-1" href="#tabs-1"><?php esc_html_e('Default Settings', 'nearby') ?></a>
+					<a class="nav-tab" data-item=".tabs-2" href="#tabs-2"><?php esc_html_e('Integration', 'nearby') ?></a>
+					<a class="nav-tab <?php echo $tab3active; ?>" data-item=".tabs-3" href="#tabs-3"><?php esc_html_e('Types', 'nearby') ?></a>
 				</h2>
 				
 				<div>
@@ -876,9 +881,9 @@ function azrcrv_n_display_options(){
 										echo '<input type="hidden" name="azrcrv_n_delete_type" value="yes" />';
 										echo '</form>';
 									}
-									echo '<p class="description">'.__('Types assigned to pages or set as defaults cannot be deleted.', 'nearby').'</p>';
+									echo '<p class="description">'.esc_html__('Types assigned to pages or set as defaults cannot be deleted.', 'nearby').'</p>';
 								}else{
-									echo __('No types have been added.', 'nearby');
+									echo esc_html__('No types have been added.', 'nearby');
 								}
 								?>
 							</td>
