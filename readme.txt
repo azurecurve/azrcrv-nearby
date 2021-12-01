@@ -1,17 +1,17 @@
 === Nearby ===
 
 Description:	Creates table of nearby locations based on GPS co-ordinates.
-Version:		2.5.0
+Version:		3.0.0
 Tags:			location,gps
 Author:			azurecurve
 Author URI:		https://development.azurecurve.co.uk/
 Plugin URI:		https://development.azurecurve.co.uk/classicpress-plugins/nearby/
-Download link:	https://github.com/azurecurve/azrcrv-nearby/releases/download/v2.5.0/azrcrv-nearby.zip
+Download link:	https://github.com/azurecurve/azrcrv-nearby/releases/download/v3.0.0/azrcrv-nearby.zip
 Donate link:	https://development.azurecurve.co.uk/support-development/
 Requires PHP:	5.6
 Requires:		1.0.0
 Tested:			4.9.99
-Text Domain:	code
+Text Domain:	azrcrv-n
 Domain Path:	/languages
 License: 		GPLv2 or later
 License URI: 	http://www.gnu.org/licenses/gpl-2.0.html
@@ -39,7 +39,7 @@ The shortcode accepts two parameters:
 Example shortcode usage: **[nearby type="Distilleries" title="Nearby Distilleries"]**
 
 Examples of this plugin in action:
-* [coppr|Distilleries To Visit](https://coppr.uk/distilleries/ireland/northern/echlinville/)
+* [coppr|Distilleries To Visit](https://coppr.uk/distilleries/ireland/northern/killowen/)
 * [DarkNexus|Tourist Attractions](https://www.darkforge.co.uk/attractions/europe/republic-of-ireland/east/county-meath/newgrange-monument/)
 
 This plugin is multisite compatible; each site will need settings to be configured in the admin dashboard.
@@ -66,6 +66,13 @@ This plugin is developed for ClassicPress, but will likely work on WordPress.
 == Changelog ==
 
 # Changelog
+
+### [Version 3.0.0](https://github.com/azurecurve/azrcrv-nearby/releases/tag/v3.0.0)
+ * Migrate type, country and co-ordinates data from cp_postmeta to custom table.
+ * Change text domain to ensure it is unique.
+ * Update to only load admin css when on plugin settings page.
+ * Update readme.txt and readme.md.
+ * Update azurecurve menu.
 
 ### [Version 2.5.0](https://github.com/azurecurve/azrcrv-nearby/releases/tag/v2.5.0)
  * Add uninstall.
@@ -127,12 +134,16 @@ This plugin is developed for ClassicPress, but will likely work on WordPress.
 
 # About azurecurve
 
-**azurecurve** was one of the first plugin developers to start developing for Classicpress; all plugins are available from [azurecurve Development](https://development.azurecurve.co.uk/) and are integrated with the [Update Manager plugin](https://codepotent.com/classicpress/plugins/update-manager/) by [CodePotent](https://codepotent.com/) for fully integrated, no hassle, updates.
+**azurecurve** was one of the first plugin developers to start developing for Classicpress; all plugins are available from [azurecurve Development](https://development.azurecurve.co.uk/) and are integrated with the [Update Manager plugin](https://directory.classicpress.net/plugins/update-manager)  for fully integrated, no hassle, updates.
 
-Some of the top plugins available from **azurecurve** are:
-* [Add Twitter Cards](https://development.azurecurve.co.uk/classicpress-plugins/add-twitter-cards/)
-* [Breadcrumbs](https://development.azurecurve.co.uk/classicpress-plugins/breadcrumbs/)
-* [Series Index](https://development.azurecurve.co.uk/classicpress-plugins/series-index/)
-* [To Twitter](https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/)
-* [Theme Switcher](https://development.azurecurve.co.uk/classicpress-plugins/theme-switcher/)
-* [Toggle Show/Hide](https://development.azurecurve.co.uk/classicpress-plugins/toggle-showhide/)
+Some of the other plugins available from **azurecurve** are:
+ * Comment Validator - [details](https://development.azurecurve.co.uk/classicpress-plugins/comment-validator/) / [download](https://github.com/azurecurve/azrcrv-comment-validator/releases/latest/)
+ * Estimated Read Time - [details](https://development.azurecurve.co.uk/classicpress-plugins/estimated-read-time/) / [download](https://github.com/azurecurve/azrcrv-estimated-read-time/releases/latest/)
+ * Events - [details](https://development.azurecurve.co.uk/classicpress-plugins/events/) / [download](https://github.com/azurecurve/azrcrv-events/releases/latest/)
+ * Filtered Categories - [details](https://development.azurecurve.co.uk/classicpress-plugins/filtered-categories/) / [download](https://github.com/azurecurve/azrcrv-filtered-categories/releases/latest/)
+ * Flags - [details](https://development.azurecurve.co.uk/classicpress-plugins/flags/) / [download](https://github.com/azurecurve/azrcrv-flags/releases/latest/)
+ * Icons - [details](https://development.azurecurve.co.uk/classicpress-plugins/icons/) / [download](https://github.com/azurecurve/azrcrv-icons/releases/latest/)
+ * Loop Injection - [details](https://development.azurecurve.co.uk/classicpress-plugins/loop-injection/) / [download](https://github.com/azurecurve/azrcrv-loop-injection/releases/latest/)
+ * Page Index - [details](https://development.azurecurve.co.uk/classicpress-plugins/page-index/) / [download](https://github.com/azurecurve/azrcrv-page-index/releases/latest/)
+ * Remove Revisions - [details](https://development.azurecurve.co.uk/classicpress-plugins/remove-revisions/) / [download](https://github.com/azurecurve/azrcrv-remove-revisions/releases/latest/)
+ * Widget Announcements - [details](https://development.azurecurve.co.uk/classicpress-plugins/widget-announcements/) / [download](https://github.com/azurecurve/azrcrv-widget-announcements/releases/latest/)
