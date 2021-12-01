@@ -471,10 +471,10 @@ function azrcrv_n_save_details_metabox( $post_id, $post ) {
 	
 	$type = '';
 	if ( isset( $_POST['azrcrv_n_type'] ) ) {
-		$type = sanitize_text_field( wp_unslash( $_POST['azrcrv_n_country'] ) );
+		$type = sanitize_text_field( wp_unslash( $_POST['azrcrv_n_type'] ) );
 	}
 	$country = '';
-	if ( isset( $_POST['azrcrv_n_type'] ) ) {
+	if ( isset( $_POST['azrcrv_n_country'] ) ) {
 		$country = sanitize_text_field( wp_unslash( $_POST['azrcrv_n_country'] ) );
 	}
 	$coordinates = '';
