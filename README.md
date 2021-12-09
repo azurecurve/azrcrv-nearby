@@ -18,7 +18,8 @@ The shortcode accepts two parameters:
  * `title` to override the default toggle title.
 
 Example shortcode usage:
-```[nearby type="Distilleries" title="Nearby Distilleries"]
+```
+[nearby type="Distilleries" title="Nearby Distilleries"]
 ```
 
 Examples of this plugin in action:
