@@ -33,10 +33,13 @@ Nearby integrates with the following [azurecurve](https://development.azurecurve
 Apply the [nearby] shortcode to a page with co-ordinates and nearby locations (pages with co-ordinates), based on the settings, will be displayed in a table.
 
 The shortcode accepts two parameters:
- * **type** to limit nearby attractions (multiple types can be provided in comma separated string)
- * **title** to override the default toggle title
+ * `type` to limit nearby attractions (multiple types can be provided in comma separated string).
+ * `title` to override the default toggle title.
 
-Example shortcode usage: **[nearby type="Distilleries" title="Nearby Distilleries"]**
+Example shortcode usage:
+```
+[nearby type="Distilleries" title="Nearby Distilleries"]
+```
 
 Examples of this plugin in action:
 * [coppr|Distilleries To Visit](https://coppr.uk/distilleries/ireland/northern/killowen/)
@@ -48,7 +51,7 @@ This plugin is multisite compatible; each site will need settings to be configur
 
 # Installation Instructions
 
- * Download the plugin from [GitHub](https://github.com/azurecurve/azrcrv-nearby/releases/latest/).
+ * Download the latest release of the plugin from [GitHub](https://github.com/azurecurve/azrcrv-nearby/releases/latest/).
  * Upload the entire zip file using the Plugins upload function in your ClassicPress admin panel.
  * Activate the plugin.
  * Configure relevant settings via the configuration page in the admin control panel (azurecurve menu).
