@@ -1,0 +1,254 @@
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Nearby\n"
+"POT-Creation-Date: 2021-12-27 18:08+0000\n"
+"PO-Revision-Date: 2019-02-24 18:52+0000\n"
+"Last-Translator: \n"
+"Language-Team: translate@azurecurve.co.uk\n"
+"Language: en_US\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.0.1\n"
+"X-Poedit-Basepath: ..\n"
+"X-Poedit-KeywordsList: __;_e;esc_html__;esc_html_e\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: azrcrv-nearby.php:271
+msgid "Settings"
+msgstr ""
+
+#: azrcrv-nearby.php:288
+msgid "Nearby Settings"
+msgstr ""
+
+#: azrcrv-nearby.php:289
+msgid "Nearby"
+msgstr ""
+
+#: azrcrv-nearby.php:320
+#, php-format
+msgid "%s Details"
+msgstr ""
+
+#: azrcrv-nearby.php:360
+msgid "Co-ordinates"
+msgstr ""
+
+#: azrcrv-nearby.php:373
+msgid "Format of co-ordinates is latitude, longitude (e.g. 51.477800, -0.001400)."
+msgstr ""
+
+#: azrcrv-nearby.php:383
+msgid "Location"
+msgstr ""
+
+#: azrcrv-nearby.php:414
+msgid "Type"
+msgstr ""
+
+#: azrcrv-nearby.php:531
+msgid "You do not have sufficient permissions to access this page."
+msgstr ""
+
+#: azrcrv-nearby.php:553
+msgid "Settings have been saved."
+msgstr ""
+
+#: azrcrv-nearby.php:557
+msgid "New type has been successfully added."
+msgstr ""
+
+#: azrcrv-nearby.php:561
+msgid "Type already exists."
+msgstr ""
+
+#: azrcrv-nearby.php:565
+msgid "Type has been successfully deleted."
+msgstr ""
+
+#: azrcrv-nearby.php:590
+msgid "Default Settings"
+msgstr ""
+
+#: azrcrv-nearby.php:591
+msgid "Integration"
+msgstr ""
+
+#: azrcrv-nearby.php:592
+msgid "Types"
+msgstr ""
+
+#: azrcrv-nearby.php:599
+#, php-format
+msgid "Nearby creates a table of nearby locations (pages) based on GPS co-ordinates and integrates with the following %s plugins:"
+msgstr ""
+
+#: azrcrv-nearby.php:601
+#, php-format
+msgid "%s allows a location to be set for a page; this will display the location flag next to the location name in the table of nearby attractions."
+msgstr ""
+
+#: azrcrv-nearby.php:602
+#, php-format
+msgid "%s allows an icon to be displayed next to a nearby location which has an entry on a timeline (requires integration with %s to be enabled)."
+msgstr ""
+
+#: azrcrv-nearby.php:603
+#, php-format
+msgid "%s allows a character (such as *) to be displayed next to a nearby location which has an entry on a timeline."
+msgstr ""
+
+#: azrcrv-nearby.php:604
+#, php-format
+msgid "%s allows the table of nearby locations to be enclosed with a toggle."
+msgstr ""
+
+#: azrcrv-nearby.php:608
+#, php-format
+msgid "Apply the %s shortcode to a page with co-ordinates and nearby locations (pages with co-ordinates), based on the settings, will be displayed in a table."
+msgstr ""
+
+#: azrcrv-nearby.php:610
+msgid "The shortcode accepts two parameters"
+msgstr ""
+
+#: azrcrv-nearby.php:612
+#, php-format
+msgid "%s to limit nearby attractions  (multiple types can be provided in comma separated string)"
+msgstr ""
+
+#: azrcrv-nearby.php:613
+#, php-format
+msgid "%s to override the default toggle title"
+msgstr ""
+
+#: azrcrv-nearby.php:617
+#, php-format
+msgid "Example shortcode usage: %s"
+msgstr ""
+
+#: azrcrv-nearby.php:619
+msgid "Examples of this plugin in action:"
+msgstr ""
+
+#: azrcrv-nearby.php:628
+msgid "Maximum Locations"
+msgstr ""
+
+#: azrcrv-nearby.php:632
+msgid "Location Distance"
+msgstr ""
+
+#: azrcrv-nearby.php:646
+msgid "Compass Type"
+msgstr ""
+
+#: azrcrv-nearby.php:667
+msgid "Default type"
+msgstr ""
+
+#: azrcrv-nearby.php:687
+msgid "Default type for new nearby locations."
+msgstr ""
+
+#: azrcrv-nearby.php:689
+msgid "Add some types to select a default."
+msgstr ""
+
+#: azrcrv-nearby.php:697
+msgid "Default shortcode types"
+msgstr ""
+
+#: azrcrv-nearby.php:716
+#, php-format
+msgid "Hold down %s to select multiple types."
+msgstr ""
+
+#: azrcrv-nearby.php:718
+msgid "Add some types to select default shortcode types."
+msgstr ""
+
+#: azrcrv-nearby.php:734 azrcrv-nearby.php:761 azrcrv-nearby.php:782
+#: azrcrv-nearby.php:834
+#, php-format
+msgid "Integrate with %s from %s"
+msgstr ""
+
+#: azrcrv-nearby.php:740 azrcrv-nearby.php:767 azrcrv-nearby.php:788
+#: azrcrv-nearby.php:840
+#, php-format
+msgid "Enable integration with %s from %s?"
+msgstr ""
+
+#: azrcrv-nearby.php:742 azrcrv-nearby.php:769 azrcrv-nearby.php:790
+#, php-format
+msgid "%s from %s not installed/activated."
+msgstr ""
+
+#: azrcrv-nearby.php:748 azrcrv-nearby.php:749
+msgid "Flag width"
+msgstr ""
+
+#: azrcrv-nearby.php:801
+msgid "Timeline Signifier"
+msgstr ""
+
+#: azrcrv-nearby.php:808
+msgid "or"
+msgstr ""
+
+#: azrcrv-nearby.php:821
+msgid "Symbol displayed next to nearby entries which have a timeline entry."
+msgstr ""
+
+#: azrcrv-nearby.php:842
+msgid "Toggle Show/Hide from azurecurve not installed/activated."
+msgstr ""
+
+#: azrcrv-nearby.php:853
+msgid "Toggle Title"
+msgstr ""
+
+#: azrcrv-nearby.php:878
+msgid "Add new type"
+msgstr ""
+
+#: azrcrv-nearby.php:897
+msgid "Existing types"
+msgstr ""
+
+#: azrcrv-nearby.php:933
+msgid "Types assigned to pages or set as defaults cannot be deleted."
+msgstr ""
+
+#: azrcrv-nearby.php:935
+msgid "No types have been added."
+msgstr ""
+
+#: azrcrv-nearby.php:949
+#, php-format
+msgid "This plugin integrates with the following plugins from %s:"
+msgstr ""
+
+#: azrcrv-nearby.php:1003 azrcrv-nearby.php:1108 azrcrv-nearby.php:1142
+msgid "You do not have permissions to perform this action"
+msgstr ""
+
+#: libraries/updateclient/UpdateClient.class.php:191
+msgid "Compatible up to:"
+msgstr ""
+
+#: libraries/updateclient/UpdateClient.class.php:192
+msgid "Reviews"
+msgstr ""
+
+#: libraries/updateclient/UpdateClient.class.php:193
+msgid "Read all reviews"
+msgstr ""
+
+#: libraries/updateclient/UpdateClient.class.php:383
+msgid "View details"
+msgstr ""
