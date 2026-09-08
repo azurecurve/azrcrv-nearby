@@ -1,12 +1,12 @@
-.azrcrv_n_tabs{
-	padding:15px !important;
+.azrcrv-n-wrap .form-table th {
+	width: 280px;
 }
-.azrcrv_n_tabs.invisible{
-	display:none;
+
+.azrcrv-settings label {
+	display: block;
+	margin-bottom: 6px;
 }
-.azrcrv_n_horiz{
-	margin:0 0 0 10px;
-}
-img.azrcrv-n{
+
+img.azrcrv-n {
 	border: none;
 }
